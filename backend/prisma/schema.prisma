@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int         @id @default(autoincrement())
+  name         String
+  email        String      @unique
+  passwordHash String      @map("password_hash")
+  role         String      @default("buyer")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  favourites   Favourite[]
+
+  @@map("users")
+}
+
+model Property {
+  id         Int         @id @default(autoincrement())
+  title      String
+  city       String
+  price      Int
+  imageUrl   String      @map("image_url")
+  createdAt  DateTime    @default(now()) @map("created_at")
+  favourites Favourite[]
+
+  @@map("properties")
+}
+
+model Favourite {
+  userId     Int      @map("user_id")
+  propertyId Int      @map("property_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@id([userId, propertyId])
+  @@map("favourites")
+}
