@@ -18,23 +18,35 @@ export const StatCard = ({
   icon,
   tone = "primary",
 }: StatCardProps) => (
-  <SectionCard contentSx={{ p: 0 }}>
-    <Stack spacing={2.5} sx={{ p: { xs: 2.5, md: 3 } }}>
+  <SectionCard
+    contentSx={{ p: 0 }}
+    sx={{
+      height: "100%",
+    }}
+  >
+    <Stack spacing={2} sx={{ p: { xs: 2.5, md: 3 } }}>
       <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-        <Stack spacing={0.75}>
-          <Typography variant="body2" color="text.secondary">
+        <Stack spacing={0.5}>
+          <Typography
+            variant="overline"
+            color="text.secondary"
+            sx={{ letterSpacing: 0.8, fontWeight: 600, fontSize: "0.7rem" }}
+          >
             {label}
           </Typography>
-          <Typography variant="h4">{value}</Typography>
+          <Typography variant="h4" fontWeight={600}>
+            {value}
+          </Typography>
         </Stack>
         <Box
           sx={(theme) => ({
-            width: 52,
-            height: 52,
-            display: "grid",
-            placeItems: "center",
-            borderRadius: 3,
-            bgcolor: alpha(theme.palette[tone].main, 0.12),
+            width: 44,
+            height: 44,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 2,
+            bgcolor: alpha(theme.palette[tone].main, 0.1),
             color: `${tone}.main`,
           })}
         >

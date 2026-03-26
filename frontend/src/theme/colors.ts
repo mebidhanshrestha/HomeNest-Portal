@@ -2,26 +2,26 @@ import type { ThemeMode } from "../stores/themeStore";
 
 // Update these two values to reskin the app.
 export const APP_BRAND_COLORS = {
-  primary: "#2F5D73",
-  secondary: "#D88462",
+  primary: "#943AD0",
+  secondary: "#F0B94B",
 };
 
 const lightSurfaces = {
-  background: "#F4F6F2",
+  background: "#F4F7FE",
   paper: "#FFFFFF",
-  paperMuted: "#EEF2EC",
-  border: "#D7E0D8",
-  textPrimary: "#1F2A33",
-  textSecondary: "#5E6C76",
+  paperMuted: "#F3EFFE",
+  border: "#D8DCEE",
+  textPrimary: "#21242E",
+  textSecondary: "#6D7285",
 };
 
 const darkSurfaces = {
-  background: "#162029",
-  paper: "#1D2A35",
-  paperMuted: "#243340",
-  border: "#314350",
-  textPrimary: "#F4F7F8",
-  textSecondary: "#B9C5CB",
+  background: "#141422",
+  paper: "#1D1C31",
+  paperMuted: "#282742",
+  border: "#3A385B",
+  textPrimary: "#F5F2FF",
+  textSecondary: "#B7B2D0",
 };
 
 export const getSurfaceTokens = (mode: ThemeMode) =>

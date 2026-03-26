@@ -1,9 +1,9 @@
 import type { PropsWithChildren, ReactNode } from "react";
-import { Card, CardContent, Stack, Typography, type CardProps } from "@mui/material";
+import { Box, Stack, Typography, type BoxProps } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
 
 type SectionCardProps = PropsWithChildren<
-  CardProps & {
+  BoxProps & {
     title?: string;
     description?: string;
     action?: ReactNode;
@@ -17,24 +17,45 @@ export const SectionCard = ({
   action,
   children,
   contentSx,
-  ...cardProps
+  sx,
+  ...boxProps
 }: SectionCardProps) => (
-  <Card {...cardProps}>
-    <CardContent
-      sx={{ p: { xs: 2.5, md: 3 }, ...(contentSx as Record<string, unknown> | undefined) }}
+  <Box
+    {...boxProps}
+    sx={[
+      (theme) => ({
+        bgcolor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 2,
+      }),
+      ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+    ]}
+  >
+    <Box
+      sx={[
+        { p: { xs: 2.5, md: 3 } },
+        ...(Array.isArray(contentSx) ? contentSx : contentSx ? [contentSx] : []),
+      ]}
     >
       <Stack spacing={3}>
         {title || description || action ? (
           <Stack
             direction={{ xs: "column", sm: "row" }}
-            spacing={1.5}
+            spacing={1}
             justifyContent="space-between"
             alignItems={{ xs: "flex-start", sm: "center" }}
           >
             <Stack spacing={0.5}>
-              {title ? <Typography variant="h5">{title}</Typography> : null}
+              {title ? (
+                <Typography variant="h6" fontWeight={600}>
+                  {title}
+                </Typography>
+              ) : null}
               {description ? (
-                <Typography color="text.secondary">{description}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {description}
+                </Typography>
               ) : null}
             </Stack>
             {action}
@@ -42,6 +63,6 @@ export const SectionCard = ({
         ) : null}
         {children}
       </Stack>
-    </CardContent>
-  </Card>
+    </Box>
+  </Box>
 );

@@ -1,4 +1,5 @@
-import { Avatar, Divider, IconButton, Stack, Typography } from "@mui/material";
+import { Avatar, IconButton, Stack, Typography } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
@@ -25,9 +26,21 @@ export const SavedPropertiesPanel = ({
       />
     ) : (
       <Stack spacing={2}>
-        {favourites.map((property, index) => (
-          <Stack key={property.id} spacing={2}>
-            <Stack direction="row" spacing={1.5} alignItems="center">
+        {favourites.map((property) => (
+          <Stack
+            key={property.id}
+            direction="row"
+            spacing={1.5}
+            alignItems="center"
+            sx={(theme) => ({
+              p: 1.5,
+              borderRadius: 3,
+              border: "1px solid",
+              borderColor: alpha(theme.palette.primary.main, 0.08),
+              backgroundColor: alpha(theme.palette.primary.main, 0.035),
+            })}
+          >
+            <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexGrow: 1 }}>
               <Avatar
                 variant="rounded"
                 src={property.imageUrl}
@@ -48,15 +61,14 @@ export const SavedPropertiesPanel = ({
                   ${property.price.toLocaleString("en-US")}
                 </Typography>
               </Stack>
-              <IconButton
-                aria-label={`Remove ${property.title} from favourites`}
-                disabled={busyPropertyId === property.id}
-                onClick={() => onRemoveFavourite(property)}
-              >
-                <DeleteOutlineOutlinedIcon />
-              </IconButton>
             </Stack>
-            {index < favourites.length - 1 ? <Divider /> : null}
+            <IconButton
+              aria-label={`Remove ${property.title} from favourites`}
+              disabled={busyPropertyId === property.id}
+              onClick={() => onRemoveFavourite(property)}
+            >
+              <DeleteOutlineOutlinedIcon />
+            </IconButton>
           </Stack>
         ))}
       </Stack>

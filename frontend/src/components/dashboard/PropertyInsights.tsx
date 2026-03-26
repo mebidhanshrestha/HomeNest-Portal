@@ -1,8 +1,5 @@
-import { List, ListItem, ListItemIcon, ListItemText } from "@mui/material";
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import LocationCityOutlinedIcon from "@mui/icons-material/LocationCityOutlined";
-import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
-import TurnedInNotOutlinedIcon from "@mui/icons-material/TurnedInNotOutlined";
+import { Stack, Typography } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { SectionCard } from "../ui/SectionCard";
 
 type PropertyInsightsProps = {
@@ -20,45 +17,33 @@ export const PropertyInsights = ({
 }: PropertyInsightsProps) => (
   <SectionCard
     title="Portfolio snapshot"
-    description="A quick summary of the catalogue and your shortlist."
+    description="Catalogue totals and shortlist progress."
   >
-    <List disablePadding sx={{ display: "grid", gap: 1 }}>
-      <ListItem disableGutters>
-        <ListItemIcon sx={{ minWidth: 40 }}>
-          <HomeOutlinedIcon fontSize="small" />
-        </ListItemIcon>
-        <ListItemText
-          primary={`${totalProperties} total listings`}
-          secondary="Everything currently available in the buyer dashboard."
-        />
-      </ListItem>
-      <ListItem disableGutters>
-        <ListItemIcon sx={{ minWidth: 40 }}>
-          <TurnedInNotOutlinedIcon fontSize="small" />
-        </ListItemIcon>
-        <ListItemText
-          primary={`${favouriteCount} saved homes`}
-          secondary="A focused shortlist helps you compare faster."
-        />
-      </ListItem>
-      <ListItem disableGutters>
-        <ListItemIcon sx={{ minWidth: 40 }}>
-          <LocationCityOutlinedIcon fontSize="small" />
-        </ListItemIcon>
-        <ListItemText
-          primary={`${cityCount} active cities`}
-          secondary="Use city filters to reduce visual noise while browsing."
-        />
-      </ListItem>
-      <ListItem disableGutters>
-        <ListItemIcon sx={{ minWidth: 40 }}>
-          <PriceCheckOutlinedIcon fontSize="small" />
-        </ListItemIcon>
-        <ListItemText
-          primary={`Average price ${averagePriceLabel}`}
-          secondary="Pricing context across the visible catalogue."
-        />
-      </ListItem>
-    </List>
+    <Stack spacing={1.25}>
+      {[
+        { label: "Total listings", value: totalProperties.toString() },
+        { label: "Saved homes", value: favouriteCount.toString() },
+        { label: "Active cities", value: cityCount.toString() },
+        { label: "Average price", value: averagePriceLabel },
+      ].map((item) => (
+        <Stack
+          key={item.label}
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          sx={(theme) => ({
+            px: 1.75,
+            py: 1.5,
+            borderRadius: 3,
+            border: "1px solid",
+            borderColor: alpha(theme.palette.primary.main, 0.08),
+            backgroundColor: alpha(theme.palette.primary.main, 0.035),
+          })}
+        >
+          <Typography color="text.secondary">{item.label}</Typography>
+          <Typography variant="h6">{item.value}</Typography>
+        </Stack>
+      ))}
+    </Stack>
   </SectionCard>
 );

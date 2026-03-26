@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import type { AlertColor } from "@mui/material";
-import { Box, Container, Grid2, Stack } from "@mui/material";
+import { Box, Container, useTheme } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "react-router-dom";
 import { normalizeAppError } from "../lib/api";
 import { useAuthStore } from "../stores/authStore";
 import { loginUser, registerUser } from "../services/authService";
-import { AuthFeaturePanel } from "../components/auth/AuthFeaturePanel";
 import {
   AuthFormCard,
   type AuthField,
@@ -75,6 +74,7 @@ export const AuthPage = () => {
   const clearAuthNotice = useAuthStore((state) => state.clearAuthNotice);
   const navigate = useNavigate();
   const location = useLocation();
+  const theme = useTheme();
   const locationState = location.state as { from?: string; message?: string } | null;
   const redirectTo = locationState?.from ?? "/dashboard";
 
@@ -186,29 +186,31 @@ export const AuthPage = () => {
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
-        py: { xs: 3, md: 6 },
+        justifyContent: "center",
+        px: 2,
+        py: 4,
+        position: "relative",
+        background:
+          theme.palette.mode === "dark"
+            ? `radial-gradient(ellipse at top, ${theme.palette.primary.dark}15 0%, transparent 50%),
+               radial-gradient(ellipse at bottom, ${theme.palette.secondary.dark}10 0%, transparent 50%),
+               ${theme.palette.background.default}`
+            : `radial-gradient(ellipse at top, ${theme.palette.primary.light}12 0%, transparent 50%),
+               radial-gradient(ellipse at bottom, ${theme.palette.secondary.light}08 0%, transparent 50%),
+               ${theme.palette.background.default}`,
       }}
     >
-      <Container maxWidth="xl">
-        <Grid2 container spacing={{ xs: 3, md: 5 }} alignItems="center">
-          <Grid2 size={{ xs: 12, lg: 6 }}>
-            <AuthFeaturePanel />
-          </Grid2>
-          <Grid2 size={{ xs: 12, lg: 6 }}>
-            <Stack sx={{ maxWidth: 520, ml: { lg: "auto" } }}>
-              <AuthFormCard
-                mode={mode}
-                formValues={formValues}
-                alert={formAlert}
-                fieldErrors={fieldErrors}
-                isPending={authMutation.isPending}
-                onModeChange={handleModeChange}
-                onFieldChange={handleFieldChange}
-                onSubmit={handleSubmit}
-              />
-            </Stack>
-          </Grid2>
-        </Grid2>
+      <Container maxWidth="sm">
+        <AuthFormCard
+          mode={mode}
+          formValues={formValues}
+          alert={formAlert}
+          fieldErrors={fieldErrors}
+          isPending={authMutation.isPending}
+          onModeChange={handleModeChange}
+          onFieldChange={handleFieldChange}
+          onSubmit={handleSubmit}
+        />
       </Container>
     </Box>
   );

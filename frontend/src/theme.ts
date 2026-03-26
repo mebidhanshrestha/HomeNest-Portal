@@ -14,7 +14,7 @@ export const createAppTheme = (mode: ThemeMode) => {
       },
       secondary: {
         main: APP_BRAND_COLORS.secondary,
-        contrastText: "#FFFFFF",
+        contrastText: "#21242E",
       },
       background: {
         default: surfaces.background,
@@ -27,30 +27,50 @@ export const createAppTheme = (mode: ThemeMode) => {
       divider: surfaces.border,
     },
     shape: {
-      borderRadius: 20,
+      borderRadius: 6,
     },
     typography: {
-      fontFamily: '"Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif',
+      fontFamily: '"Inter", "SF Pro Display", "Segoe UI", "Helvetica Neue", sans-serif',
       h2: {
         fontWeight: 700,
-        lineHeight: 1.08,
+        lineHeight: 1.15,
+        letterSpacing: "-0.025em",
       },
       h3: {
         fontWeight: 700,
-        lineHeight: 1.1,
+        lineHeight: 1.2,
+        letterSpacing: "-0.02em",
       },
       h4: {
-        fontWeight: 700,
+        fontWeight: 600,
+        letterSpacing: "-0.015em",
       },
       h5: {
-        fontWeight: 700,
+        fontWeight: 600,
+        letterSpacing: "-0.01em",
       },
       h6: {
-        fontWeight: 700,
+        fontWeight: 600,
+      },
+      subtitle1: {
+        fontWeight: 500,
+      },
+      subtitle2: {
+        fontWeight: 500,
+      },
+      body1: {
+        lineHeight: 1.6,
+      },
+      body2: {
+        lineHeight: 1.5,
       },
       button: {
-        fontWeight: 700,
+        fontWeight: 600,
         textTransform: "none",
+      },
+      overline: {
+        fontWeight: 600,
+        letterSpacing: "0.08em",
       },
     },
     components: {
@@ -68,21 +88,10 @@ export const createAppTheme = (mode: ThemeMode) => {
             backgroundColor: surfaces.background,
             backgroundImage:
               mode === "light"
-                ? `radial-gradient(circle at top left, ${alpha(
-                    APP_BRAND_COLORS.primary,
-                    0.12,
-                  )}, transparent 30%), radial-gradient(circle at top right, ${alpha(
-                    APP_BRAND_COLORS.secondary,
-                    0.14,
-                  )}, transparent 24%)`
-                : `radial-gradient(circle at top left, ${alpha(
-                    APP_BRAND_COLORS.primary,
-                    0.18,
-                  )}, transparent 28%), radial-gradient(circle at top right, ${alpha(
-                    APP_BRAND_COLORS.secondary,
-                    0.12,
-                  )}, transparent 22%)`,
+                ? `linear-gradient(180deg, ${alpha(APP_BRAND_COLORS.primary, 0.02)} 0%, transparent 50%)`
+                : `linear-gradient(180deg, ${alpha(APP_BRAND_COLORS.primary, 0.04)} 0%, transparent 50%)`,
             color: surfaces.textPrimary,
+            scrollbarColor: `${alpha(APP_BRAND_COLORS.primary, 0.3)} transparent`,
           },
           a: {
             color: "inherit",
@@ -93,7 +102,7 @@ export const createAppTheme = (mode: ThemeMode) => {
             maxWidth: "100%",
           },
           "::selection": {
-            backgroundColor: alpha(APP_BRAND_COLORS.primary, 0.18),
+            backgroundColor: alpha(APP_BRAND_COLORS.primary, 0.15),
           },
         },
       },
@@ -111,66 +120,163 @@ export const createAppTheme = (mode: ThemeMode) => {
         },
         styleOverrides: {
           root: {
-            minHeight: 48,
-            borderRadius: 16,
-            paddingInline: 20,
+            minHeight: 44,
+            borderRadius: 6,
+            paddingInline: 18,
+            fontWeight: 600,
+            transition: "all 150ms ease",
+          },
+          containedPrimary: {
+            background: APP_BRAND_COLORS.primary,
+            "&:hover": {
+              background: alpha(APP_BRAND_COLORS.primary, 0.9),
+            },
+          },
+          containedSecondary: {
+            background: APP_BRAND_COLORS.secondary,
+            "&:hover": {
+              background: alpha(APP_BRAND_COLORS.secondary, 0.9),
+            },
           },
           outlined: {
             borderColor: surfaces.border,
+            "&:hover": {
+              borderColor: APP_BRAND_COLORS.primary,
+              backgroundColor: alpha(APP_BRAND_COLORS.primary, 0.04),
+            },
           },
         },
       },
       MuiCard: {
         styleOverrides: {
           root: {
-            borderRadius: 28,
+            borderRadius: 8,
             backgroundImage: "none",
             border: `1px solid ${surfaces.border}`,
-            boxShadow:
-              mode === "light"
-                ? "0 20px 50px rgba(31, 42, 51, 0.08)"
-                : "0 24px 56px rgba(4, 12, 20, 0.42)",
+            boxShadow: "none",
           },
         },
       },
       MuiChip: {
         styleOverrides: {
           root: {
-            borderRadius: 999,
-            fontWeight: 600,
+            borderRadius: 4,
+            fontWeight: 500,
+            height: 28,
+          },
+          sizeSmall: {
+            height: 24,
           },
         },
       },
       MuiOutlinedInput: {
         styleOverrides: {
           root: {
-            borderRadius: 16,
-            backgroundColor: alpha(surfaces.paperMuted, mode === "light" ? 0.5 : 0.85),
+            borderRadius: 6,
+            backgroundColor: alpha(surfaces.paper, mode === "light" ? 0.6 : 0.4),
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: alpha(APP_BRAND_COLORS.primary, 0.4),
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: APP_BRAND_COLORS.primary,
+              borderWidth: 1.5,
+            },
           },
           notchedOutline: {
             borderColor: surfaces.border,
+            transition: "border-color 150ms ease",
           },
         },
       },
       MuiPaper: {
         styleOverrides: {
+          root: {
+            backgroundImage: "none",
+          },
           rounded: {
-            borderRadius: 24,
+            borderRadius: 8,
+          },
+        },
+      },
+      MuiMenu: {
+        styleOverrides: {
+          paper: {
+            borderRadius: 8,
+            border: `1px solid ${surfaces.border}`,
+            boxShadow:
+              mode === "light"
+                ? "0 4px 20px rgba(0, 0, 0, 0.08)"
+                : "0 4px 20px rgba(0, 0, 0, 0.3)",
+          },
+        },
+      },
+      MuiListItemButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 6,
+            transition: "background-color 150ms ease",
           },
         },
       },
       MuiTab: {
         styleOverrides: {
           root: {
-            minHeight: 44,
+            minHeight: 40,
+            minWidth: 100,
+            borderRadius: 6,
+            fontWeight: 600,
+            fontSize: "0.875rem",
+            color: surfaces.textSecondary,
+            transition: "all 150ms ease",
+            "&.Mui-selected": {
+              color: APP_BRAND_COLORS.primary,
+            },
           },
         },
       },
       MuiTabs: {
         styleOverrides: {
+          root: {
+            padding: 4,
+            borderRadius: 8,
+            backgroundColor: alpha(surfaces.paper, mode === "light" ? 0.6 : 0.4),
+          },
           indicator: {
-            height: 3,
-            borderRadius: 999,
+            height: "calc(100% - 8px)",
+            top: 4,
+            bottom: 4,
+            borderRadius: 4,
+            backgroundColor: surfaces.paper,
+            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.08)",
+          },
+        },
+      },
+      MuiSwitch: {
+        styleOverrides: {
+          root: {
+            width: 40,
+            height: 24,
+            padding: 0,
+          },
+          switchBase: {
+            padding: 2,
+            "&.Mui-checked": {
+              transform: "translateX(16px)",
+              "& + .MuiSwitch-track": {
+                backgroundColor: APP_BRAND_COLORS.primary,
+                opacity: 1,
+              },
+            },
+          },
+          thumb: {
+            width: 20,
+            height: 20,
+            boxShadow: "none",
+          },
+          track: {
+            borderRadius: 12,
+            backgroundColor: surfaces.border,
+            opacity: 1,
           },
         },
       },
@@ -178,6 +284,36 @@ export const createAppTheme = (mode: ThemeMode) => {
         styleOverrides: {
           root: {
             borderColor: surfaces.border,
+          },
+        },
+      },
+      MuiAvatar: {
+        styleOverrides: {
+          root: {
+            fontWeight: 600,
+          },
+        },
+      },
+      MuiAlert: {
+        styleOverrides: {
+          root: {
+            borderRadius: 6,
+          },
+          standardWarning: {
+            backgroundColor: alpha("#F0B94B", 0.12),
+            color: mode === "light" ? "#92400E" : "#FCD34D",
+          },
+          standardError: {
+            backgroundColor: alpha("#EF4444", 0.12),
+            color: mode === "light" ? "#991B1B" : "#FCA5A5",
+          },
+          standardSuccess: {
+            backgroundColor: alpha("#10B981", 0.12),
+            color: mode === "light" ? "#065F46" : "#6EE7B7",
+          },
+          standardInfo: {
+            backgroundColor: alpha(APP_BRAND_COLORS.primary, 0.1),
+            color: mode === "light" ? APP_BRAND_COLORS.primary : "#C4B5FD",
           },
         },
       },

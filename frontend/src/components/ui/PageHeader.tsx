@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 
 type PageHeaderProps = {
   eyebrow?: string;
@@ -14,27 +15,57 @@ export const PageHeader = ({
   subtitle,
   actions,
 }: PageHeaderProps) => (
-  <Stack
-    direction={{ xs: "column", lg: "row" }}
-    spacing={2}
-    justifyContent="space-between"
-    alignItems={{ xs: "flex-start", lg: "flex-end" }}
+  <Box
+    sx={(theme) => ({
+      display: "flex",
+      flexDirection: { xs: "column", lg: "row" },
+      alignItems: { xs: "flex-start", lg: "center" },
+      justifyContent: "space-between",
+      gap: 2.5,
+      px: { xs: 2.5, md: 4 },
+      py: { xs: 2.5, md: 3.5 },
+      borderRadius: 4,
+      border: "1px solid",
+      borderColor: "divider",
+      backgroundColor: alpha(theme.palette.background.paper, 0.92),
+      boxShadow:
+        theme.palette.mode === "light"
+          ? "0 12px 28px rgba(24, 29, 41, 0.05)"
+          : "0 18px 32px rgba(0, 0, 0, 0.24)",
+      animation: "shell-rise 560ms cubic-bezier(0.22, 1, 0.36, 1) both",
+    })}
   >
-    <Stack spacing={1}>
+    <Stack spacing={1} sx={{ minWidth: 0 }}>
       {eyebrow ? (
         <Typography
           variant="overline"
           color="primary.main"
-          sx={{ letterSpacing: 1.4, fontWeight: 700 }}
+          sx={{ letterSpacing: 1.8, fontWeight: 800 }}
         >
           {eyebrow}
         </Typography>
       ) : null}
-      <Typography variant="h3">{title}</Typography>
-      <Typography color="text.secondary" sx={{ maxWidth: 720 }}>
+      <Typography variant="h3" sx={{ fontSize: { xs: "2rem", md: "3.15rem" } }}>
+        {title}
+      </Typography>
+      <Typography color="text.secondary" sx={{ maxWidth: 760 }}>
         {subtitle}
       </Typography>
     </Stack>
-    {actions}
-  </Stack>
+    {actions ? (
+      <Box
+        sx={(theme) => ({
+          px: 2,
+          py: 1.5,
+          minWidth: { lg: 180 },
+          borderRadius: 3,
+          border: "1px solid",
+          borderColor: alpha(theme.palette.primary.main, 0.12),
+          backgroundColor: alpha(theme.palette.primary.main, 0.06),
+        })}
+      >
+        {actions}
+      </Box>
+    ) : null}
+  </Box>
 );

@@ -1,195 +1,314 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  AppBar,
   Avatar,
   Box,
   Divider,
   Drawer,
   IconButton,
   List,
+  ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Paper,
+  Menu,
+  MenuItem,
   Stack,
-  Toolbar,
+  Switch,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
-import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
-import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
-import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
-import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
-import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
-import TurnedInNotOutlinedIcon from "@mui/icons-material/TurnedInNotOutlined";
+import { alpha, useTheme } from "@mui/material/styles";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import GridViewIcon from "@mui/icons-material/GridView";
+import HomeWorkIcon from "@mui/icons-material/HomeWork";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import LogoutIcon from "@mui/icons-material/Logout";
+import MenuIcon from "@mui/icons-material/Menu";
+import PersonIcon from "@mui/icons-material/Person";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { useThemeStore } from "../stores/themeStore";
-import { AppButton } from "./ui/AppButton";
-import { AppLogo } from "./ui/AppLogo";
+import homeNestLogo from "../assets/images/home-nest.png";
+import homeNestIcon from "../assets/images/home-nest icon.png";
 
-const drawerWidth = 296;
+const DRAWER_WIDTH = 260;
+const COLLAPSED_DRAWER_WIDTH = 72;
+const NAV_ITEM_HEIGHT = 48;
 
 const navigationItems = [
   {
     label: "Overview",
-    description: "Summary and quick actions",
     path: "/dashboard",
-    icon: <DashboardOutlinedIcon />,
+    icon: <GridViewIcon />,
     matches: (pathname: string) => pathname === "/dashboard" || pathname === "/dashboard/overview",
   },
   {
     label: "Listings",
-    description: "Browse all properties",
     path: "/dashboard/listings",
-    icon: <HomeOutlinedIcon />,
+    icon: <HomeWorkIcon />,
     matches: (pathname: string) => pathname.startsWith("/dashboard/listings"),
   },
   {
-    label: "Saved Homes",
-    description: "Manage your shortlist",
+    label: "Saved",
     path: "/dashboard/saved",
-    icon: <TurnedInNotOutlinedIcon />,
+    icon: <BookmarkIcon />,
     matches: (pathname: string) => pathname.startsWith("/dashboard/saved"),
   },
   {
     label: "Account",
-    description: "Profile and preferences",
     path: "/dashboard/account",
-    icon: <PersonOutlineOutlinedIcon />,
+    icon: <PersonIcon />,
     matches: (pathname: string) => pathname.startsWith("/dashboard/account"),
   },
 ];
 
 export const AppLayout = () => {
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
+  const [desktopOpen, setDesktopOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
   const user = useAuthStore((state) => state.user);
   const clearSession = useAuthStore((state) => state.clearSession);
   const mode = useThemeStore((state) => state.mode);
   const toggleMode = useThemeStore((state) => state.toggleMode);
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    if (!isDesktop) {
+      setMobileOpen(false);
+      return;
+    }
+    setDesktopOpen(true);
+  }, [isDesktop]);
+
   const activeItem =
     navigationItems.find((item) => item.matches(location.pathname)) ?? navigationItems[0];
+  const drawerOpen = isDesktop ? desktopOpen : mobileOpen;
+  const sidebarExpanded = isDesktop ? desktopOpen : true;
+  const profileMenuOpen = Boolean(profileAnchorEl);
 
-  const drawerContent = (
+  const userInitial = useMemo(
+    () => user?.name?.trim().charAt(0).toUpperCase() ?? "U",
+    [user?.name],
+  );
+
+  const handleDrawerToggle = () => {
+    if (isDesktop) {
+      setDesktopOpen((current) => !current);
+      return;
+    }
+    setMobileOpen((current) => !current);
+  };
+
+  const handleNavigationClose = () => {
+    if (!isDesktop) {
+      setMobileOpen(false);
+    }
+  };
+
+  const handleProfileClose = () => {
+    setProfileAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    handleProfileClose();
+    clearSession();
+    navigate("/auth", { replace: true });
+  };
+
+  const sidebarContent = (
     <Stack sx={{ height: "100%" }}>
-      <Stack spacing={3} sx={{ px: 2.5, py: 3 }}>
-        <AppLogo showText={false} />
-        <Stack spacing={0.75}>
-          <Typography variant="h6">Buyer workspace</Typography>
-          <Typography color="text.secondary">
-            Move between overview, listings, saved homes, and account pages from one place.
-          </Typography>
-        </Stack>
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={1}
+        sx={{
+          px: sidebarExpanded ? 2.5 : 1.5,
+          py: 2,
+          minHeight: sidebarExpanded ? 72 : 64,
+          borderBottom: "1px solid",
+          borderColor: "divider",
+        }}
+      >
+        <Box
+          component="img"
+          src={sidebarExpanded ? homeNestLogo : homeNestIcon}
+          alt="HomeNest"
+          sx={{
+            width: sidebarExpanded ? 140 : 36,
+            height: "auto",
+            maxHeight: sidebarExpanded ? 40 : 36,
+            objectFit: "contain",
+            flexShrink: 0,
+          }}
+        />
+        {sidebarExpanded && <Box sx={{ flexGrow: 1 }} />}
+        <IconButton
+          onClick={handleDrawerToggle}
+          size="small"
+          sx={(theme) => ({
+            color: "text.secondary",
+            bgcolor: alpha(theme.palette.text.primary, 0.04),
+            "&:hover": {
+              bgcolor: alpha(theme.palette.text.primary, 0.08),
+            },
+          })}
+        >
+          {sidebarExpanded ? <ChevronLeftIcon fontSize="small" /> : <ChevronRightIcon fontSize="small" />}
+        </IconButton>
       </Stack>
 
-      <List sx={{ px: 1.5, py: 0 }}>
+      <List sx={{ px: 1.25, py: 1.5, flexGrow: 1 }}>
         {navigationItems.map((item) => {
           const selected = item.matches(location.pathname);
 
           return (
-            <ListItemButton
-              key={item.path}
-              component={NavLink}
-              to={item.path}
-              onClick={() => setMobileOpen(false)}
-              selected={selected}
-              sx={{
-                mb: 0.75,
-                borderRadius: 3,
-                alignItems: "flex-start",
-                py: 1.5,
-                px: 1.5,
-                "&.Mui-selected": {
-                  bgcolor: "primary.main",
-                  color: "primary.contrastText",
-                  "& .MuiListItemIcon-root": {
-                    color: "inherit",
-                  },
-                },
-              }}
-            >
-              <ListItemIcon
+            <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
+              <ListItemButton
+                component={NavLink}
+                to={item.path}
+                onClick={handleNavigationClose}
+                selected={selected}
                 sx={{
-                  minWidth: 40,
-                  color: selected ? "inherit" : "primary.main",
-                  mt: 0.25,
+                  height: NAV_ITEM_HEIGHT,
+                  px: sidebarExpanded ? 2 : 1.5,
+                  justifyContent: sidebarExpanded ? "flex-start" : "center",
+                  borderRadius: 2,
+                  transition: "all 150ms ease",
+                  "&.Mui-selected": {
+                    bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+                    "&:hover": {
+                      bgcolor: (theme) => alpha(theme.palette.primary.main, 0.12),
+                    },
+                  },
+                  "&:hover": {
+                    bgcolor: (theme) => alpha(theme.palette.text.primary, 0.04),
+                  },
                 }}
               >
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText
-                primary={item.label}
-                secondary={item.description}
-                primaryTypographyProps={{ fontWeight: 700 }}
-                secondaryTypographyProps={{
-                  color: selected ? "rgba(255,255,255,0.72)" : "text.secondary",
-                }}
-              />
-            </ListItemButton>
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    width: sidebarExpanded ? 24 : 24,
+                    mr: sidebarExpanded ? 2 : 0,
+                    justifyContent: "center",
+                    color: selected ? "primary.main" : "text.secondary",
+                    transition: "color 150ms ease",
+                  }}
+                >
+                  {item.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.label}
+                  sx={{
+                    display: sidebarExpanded ? "block" : "none",
+                    opacity: sidebarExpanded ? 1 : 0,
+                  }}
+                  primaryTypographyProps={{
+                    fontWeight: selected ? 600 : 500,
+                    fontSize: "0.875rem",
+                    color: selected ? "text.primary" : "text.secondary",
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
           );
         })}
       </List>
 
-      <Box sx={{ mt: "auto", px: 2.5, py: 3 }}>
-        <Paper sx={{ p: 2.5 }}>
-          <Stack direction="row" spacing={1.5} alignItems="center">
-            <Avatar sx={{ bgcolor: "secondary.main", color: "secondary.contrastText" }}>
-              {user?.name?.charAt(0).toUpperCase() ?? "U"}
-            </Avatar>
-            <Box sx={{ minWidth: 0 }}>
-              <Typography variant="subtitle1" noWrap>
+      <Divider />
+      
+      <Box sx={{ p: 1.5 }}>
+        <Stack
+          direction={sidebarExpanded ? "row" : "column"}
+          spacing={sidebarExpanded ? 1.5 : 1}
+          alignItems="center"
+          sx={(theme) => ({
+            px: sidebarExpanded ? 1.5 : 1,
+            py: 1.5,
+            borderRadius: 2,
+            cursor: "pointer",
+            transition: "background-color 150ms ease",
+            "&:hover": {
+              bgcolor: alpha(theme.palette.text.primary, 0.04),
+            },
+          })}
+          onClick={(e) => setProfileAnchorEl(e.currentTarget)}
+        >
+          <Avatar
+            sx={{
+              width: 36,
+              height: 36,
+              bgcolor: "primary.main",
+              color: "primary.contrastText",
+              fontSize: "0.875rem",
+            }}
+          >
+            {userInitial}
+          </Avatar>
+          {sidebarExpanded && (
+            <Box sx={{ minWidth: 0, flexGrow: 1 }}>
+              <Typography variant="subtitle2" noWrap fontWeight={600}>
                 {user?.name ?? "Buyer"}
               </Typography>
-              <Typography variant="body2" color="text.secondary" noWrap>
+              <Typography variant="caption" color="text.secondary" noWrap>
                 {user?.email ?? "Signed in"}
               </Typography>
             </Box>
-          </Stack>
-        </Paper>
+          )}
+        </Stack>
       </Box>
     </Stack>
   );
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}>
       <Drawer
         variant="temporary"
-        open={mobileOpen}
+        open={!isDesktop && drawerOpen}
         onClose={() => setMobileOpen(false)}
         ModalProps={{ keepMounted: true }}
         sx={{
           display: { xs: "block", lg: "none" },
           "& .MuiDrawer-paper": {
-            width: drawerWidth,
+            width: DRAWER_WIDTH,
+            boxSizing: "border-box",
             borderRight: "1px solid",
             borderColor: "divider",
-            boxSizing: "border-box",
-          },
-        }}
-      >
-        {drawerContent}
-      </Drawer>
-
-      <Drawer
-        variant="permanent"
-        open
-        sx={{
-          display: { xs: "none", lg: "block" },
-          width: drawerWidth,
-          flexShrink: 0,
-          "& .MuiDrawer-paper": {
-            width: drawerWidth,
-            borderRight: "1px solid",
-            borderColor: "divider",
-            boxSizing: "border-box",
             bgcolor: "background.paper",
           },
         }}
       >
-        {drawerContent}
+        {sidebarContent}
+      </Drawer>
+
+      <Drawer
+        variant="permanent"
+        open={isDesktop ? drawerOpen : false}
+        sx={{
+          display: { xs: "none", lg: "block" },
+          width: desktopOpen ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            width: desktopOpen ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
+            boxSizing: "border-box",
+            borderRight: "1px solid",
+            borderColor: "divider",
+            bgcolor: "background.paper",
+            overflowX: "hidden",
+            transition: theme.transitions.create("width", {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+          },
+        }}
+      >
+        {sidebarContent}
       </Drawer>
 
       <Box
@@ -197,84 +316,137 @@ export const AppLayout = () => {
         sx={{
           flexGrow: 1,
           minWidth: 0,
-          minHeight: "100vh",
-          pb: { xs: 4, md: 6 },
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        <AppBar position="sticky">
-          <Box sx={{ px: { xs: 2, md: 3 }, py: 2 }}>
-            <Paper sx={{ px: { xs: 1.5, md: 2 }, py: 1 }}>
-              <Toolbar disableGutters sx={{ gap: 2, minHeight: 72 }}>
-                <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexGrow: 1, minWidth: 0 }}>
-                  <IconButton
-                    color="primary"
-                    onClick={() => setMobileOpen(true)}
-                    aria-label="Open navigation menu"
-                    sx={{ display: { lg: "none" } }}
-                  >
-                    <MenuOutlinedIcon />
-                  </IconButton>
+        <Box
+          sx={(theme) => ({
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            px: { xs: 2, md: 3 },
+            py: { xs: 1.5, md: 2 },
+            borderBottom: "1px solid",
+            borderColor: "divider",
+            bgcolor: alpha(theme.palette.background.paper, 0.8),
+            backdropFilter: "blur(8px)",
+            position: "sticky",
+            top: 0,
+            zIndex: theme.zIndex.appBar,
+          })}
+        >
+          {!isDesktop && (
+            <IconButton
+              aria-label="Open navigation"
+              onClick={handleDrawerToggle}
+              sx={{ color: "text.secondary" }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
 
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography variant="h6" noWrap>
-                      {activeItem.label}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" noWrap>
-                      {activeItem.description}
-                    </Typography>
-                  </Box>
-                </Stack>
-
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <IconButton color="primary" onClick={toggleMode} aria-label="Toggle theme mode">
-                    {mode === "light" ? <DarkModeOutlinedIcon /> : <LightModeOutlinedIcon />}
-                  </IconButton>
-
-                  <Divider
-                    orientation="vertical"
-                    flexItem
-                    sx={{ display: { xs: "none", md: "block" } }}
-                  />
-
-                  <Stack
-                    direction="row"
-                    spacing={1.5}
-                    alignItems="center"
-                    sx={{ display: { xs: "none", md: "flex" }, minWidth: 0 }}
-                  >
-                    <Avatar sx={{ bgcolor: "secondary.main", color: "secondary.contrastText" }}>
-                      {user?.name?.charAt(0).toUpperCase() ?? "U"}
-                    </Avatar>
-                    <Box sx={{ minWidth: 0 }}>
-                      <Typography variant="subtitle2" noWrap>
-                        {user?.name ?? "Buyer"}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" noWrap>
-                        {user?.email ?? "Signed in"}
-                      </Typography>
-                    </Box>
-                  </Stack>
-
-                  <AppButton
-                    variant="outlined"
-                    startIcon={<LogoutOutlinedIcon />}
-                    onClick={() => {
-                      clearSession();
-                      navigate("/auth", { replace: true });
-                    }}
-                  >
-                    Logout
-                  </AppButton>
-                </Stack>
-              </Toolbar>
-            </Paper>
+          <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+            <Typography
+              variant="h6"
+              noWrap
+              fontWeight={600}
+              color="text.primary"
+            >
+              {activeItem.label}
+            </Typography>
           </Box>
-        </AppBar>
 
-        <Box sx={{ px: { xs: 2, md: 3 } }}>
+          <IconButton
+            onClick={(event) => setProfileAnchorEl(event.currentTarget)}
+            sx={{ p: 0.5 }}
+          >
+            <Avatar
+              sx={{
+                width: 36,
+                height: 36,
+                bgcolor: "primary.main",
+                color: "primary.contrastText",
+                fontSize: "0.875rem",
+              }}
+            >
+              {userInitial}
+            </Avatar>
+          </IconButton>
+        </Box>
+
+        <Box
+          sx={{
+            flexGrow: 1,
+            px: { xs: 2, md: 3 },
+            py: { xs: 2, md: 3 },
+          }}
+        >
           <Outlet />
         </Box>
       </Box>
+
+      <Menu
+        anchorEl={profileAnchorEl}
+        open={profileMenuOpen}
+        onClose={handleProfileClose}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        PaperProps={{
+          sx: {
+            mt: 1,
+            minWidth: 200,
+          },
+        }}
+      >
+        <Box sx={{ px: 2, py: 1.5 }}>
+          <Typography variant="subtitle2" fontWeight={600}>
+            {user?.name ?? "Buyer"}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {user?.email ?? "Signed in"}
+          </Typography>
+        </Box>
+        <Divider />
+        <MenuItem
+          onClick={(event) => event.stopPropagation()}
+          sx={{ py: 1.25 }}
+        >
+          {mode === "light" ? (
+            <DarkModeIcon fontSize="small" sx={{ mr: 1.5, color: "text.secondary" }} />
+          ) : (
+            <LightModeIcon fontSize="small" sx={{ mr: 1.5, color: "text.secondary" }} />
+          )}
+          <Typography sx={{ flexGrow: 1 }} variant="body2">
+            Dark mode
+          </Typography>
+          <Switch
+            edge="end"
+            size="small"
+            checked={mode === "dark"}
+            onChange={() => {
+              toggleMode();
+              handleProfileClose();
+            }}
+            onClick={(event) => event.stopPropagation()}
+          />
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleProfileClose();
+            navigate("/dashboard/account");
+          }}
+          sx={{ py: 1.25 }}
+        >
+          <PersonIcon fontSize="small" sx={{ mr: 1.5, color: "text.secondary" }} />
+          <Typography variant="body2">Account settings</Typography>
+        </MenuItem>
+        <Divider />
+        <MenuItem onClick={handleLogout} sx={{ py: 1.25 }}>
+          <LogoutIcon fontSize="small" sx={{ mr: 1.5, color: "text.secondary" }} />
+          <Typography variant="body2">Sign out</Typography>
+        </MenuItem>
+      </Menu>
     </Box>
   );
 };

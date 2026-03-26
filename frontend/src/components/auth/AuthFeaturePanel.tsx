@@ -1,16 +1,11 @@
 import {
-  Chip,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Stack,
   Typography,
 } from "@mui/material";
-import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
-import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
+import { alpha } from "@mui/material/styles";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
+import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import { AppLogo } from "../ui/AppLogo";
 import { SectionCard } from "../ui/SectionCard";
 
@@ -33,54 +28,63 @@ const highlights = [
 ];
 
 export const AuthFeaturePanel = () => (
-  <Stack spacing={3.5}>
+  <Stack spacing={4} sx={{ animation: "shell-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both" }}>
     <AppLogo subtitle="Simple, modern, and easy to use" />
     <Stack spacing={1.5}>
       <Typography
         variant="overline"
         color="primary.main"
-        sx={{ letterSpacing: 1.5, fontWeight: 700 }}
+        sx={{ letterSpacing: 1.8, fontWeight: 800 }}
       >
         Buyer Portal
       </Typography>
       <Typography variant="h2" sx={{ maxWidth: 560 }}>
-        A cleaner property dashboard built around clarity.
+        Find, compare, and save homes in one calm workspace.
       </Typography>
       <Typography color="text.secondary" sx={{ maxWidth: 560 }}>
-        HomeNest keeps sign in, saved homes, and listing discovery in one calm interface with a
-        limited color palette and clear actions.
+        HomeNest now uses the same restrained shell language as your Class Schedular reference:
+        a quiet workspace, one strong accent color, and clear actions.
       </Typography>
     </Stack>
-    <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-      <Chip icon={<InsightsOutlinedIcon />} label="Modern layout" />
-      <Chip icon={<FavoriteBorderOutlinedIcon />} label="Saved homes at a glance" />
-      <Chip icon={<ShieldOutlinedIcon />} label="Reusable MUI components" />
-    </Stack>
     <SectionCard
-      title="What changed"
-      description="The UI now uses a small set of reusable Material UI components and a single theme source."
-      variant="outlined"
+      title="What you can do here"
+      description="Everything important is visible at a glance before you even sign in."
+      sx={(theme) => ({
+        backgroundColor: alpha(theme.palette.primary.main, 0.04),
+      })}
     >
-      <List disablePadding sx={{ display: "grid", gap: 1.5 }}>
+      <Stack spacing={1.5}>
         {highlights.map((highlight) => (
-          <ListItem key={highlight.title} disableGutters sx={{ alignItems: "flex-start", py: 0 }}>
-            <ListItemIcon
+          <Stack
+            key={highlight.title}
+            direction="row"
+            spacing={1.5}
+            sx={{
+              alignItems: "flex-start",
+            }}
+          >
+            <Stack
               sx={{
-                minWidth: 40,
+                width: 40,
+                height: 40,
+                borderRadius: 2.5,
+                alignItems: "center",
+                justifyContent: "center",
+                display: "flex",
                 mt: 0.25,
                 color: "primary.main",
+                bgcolor: "rgba(255,255,255,0.7)",
               }}
             >
               {highlight.icon}
-            </ListItemIcon>
-            <ListItemText
-              primary={highlight.title}
-              secondary={highlight.description}
-              primaryTypographyProps={{ fontWeight: 600 }}
-            />
-          </ListItem>
+            </Stack>
+            <Stack spacing={0.4}>
+              <Typography fontWeight={700}>{highlight.title}</Typography>
+              <Typography color="text.secondary">{highlight.description}</Typography>
+            </Stack>
+          </Stack>
         ))}
-      </List>
+      </Stack>
     </SectionCard>
   </Stack>
 );
