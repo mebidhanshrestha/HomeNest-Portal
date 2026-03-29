@@ -19,7 +19,7 @@ propertyRoutes.get("/:id", requireAuth, asyncHandler(getProperty));
 propertyRoutes.post(
   "/",
   requireAuth,
-  propertyImageUpload.single("image"),
+  propertyImageUpload,
   asyncHandler(createProperty),
 );
 propertyRoutes.put("/:id", requireAuth, asyncHandler(updateProperty));

@@ -1,10 +1,8 @@
-import fs from "node:fs";
-import path from "node:path";
 import type { Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../db/prisma.js";
 import { AppError } from "../utils/http.js";
-import { uploadsDirectory } from "../utils/uploads.js";
+import { deleteCloudinaryImage, uploadPropertyImage } from "../utils/cloudinary.js";
 import {
   createPropertySchema,
   propertyListQuerySchema,
@@ -18,6 +16,7 @@ const mapPropertyResponse = (property: {
   city: string;
   price: number;
   imageUrl: string;
+  imagePublicId?: string | null;
   createdAt: Date;
   creator: { id: number; name: string; email: string } | null;
   favourites: { userId: number }[];
@@ -167,28 +166,35 @@ export const createProperty = async (request: Request, response: Response) => {
     throw new AppError("Property image is required.", 400);
   }
 
-  const imageUrl = `${request.protocol}://${request.get("host")}/uploads/${request.file.filename}`;
-  const property = await prisma.property.create({
-    data: {
-      ...values,
-      imageUrl,
-      createdById: request.user.sub,
-    },
-    include: {
-      creator: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
+  const uploadedImage = await uploadPropertyImage(request.file);
+
+  try {
+    const property = await prisma.property.create({
+      data: {
+        ...values,
+        imageUrl: uploadedImage.secure_url,
+        imagePublicId: uploadedImage.public_id,
+        createdById: request.user.sub,
+      },
+      include: {
+        creator: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        favourites: {
+          select: { userId: true },
         },
       },
-      favourites: {
-        select: { userId: true },
-      },
-    },
-  });
+    });
 
-  response.status(201).json({ property: mapPropertyResponse(property) });
+    response.status(201).json({ property: mapPropertyResponse(property) });
+  } catch (error) {
+    await deleteCloudinaryImage(uploadedImage.public_id);
+    throw error;
+  }
 };
 
 export const updateProperty = async (request: Request, response: Response) => {
@@ -239,14 +245,8 @@ export const deleteProperty = async (request: Request, response: Response) => {
     throw new AppError("Property not found.", 404);
   }
 
-  const uploadsPrefix = `${request.protocol}://${request.get("host")}/uploads/`;
-  if (existingProperty.imageUrl.startsWith(uploadsPrefix)) {
-    const filename = existingProperty.imageUrl.slice(uploadsPrefix.length);
-    const filePath = path.join(uploadsDirectory, filename);
-
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
+  if (existingProperty.imagePublicId) {
+    await deleteCloudinaryImage(existingProperty.imagePublicId);
   }
 
   await prisma.property.delete({ where: { id } });

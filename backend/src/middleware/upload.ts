@@ -1,39 +1,37 @@
-import path from "node:path";
-import multer from "multer";
+import fileUpload from "express-fileupload";
+import type { RequestHandler } from "express";
 import { AppError } from "../utils/http.js";
-import { ensureUploadsDirectory, uploadsDirectory } from "../utils/uploads.js";
-
-const storage = multer.diskStorage({
-  destination: (_request, _file, callback) => {
-    ensureUploadsDirectory();
-    callback(null, uploadsDirectory);
-  },
-  filename: (_request, file, callback) => {
-    const extension = path.extname(file.originalname).toLowerCase();
-    const baseName = path
-      .basename(file.originalname, extension)
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 50);
-
-    callback(null, `${Date.now()}-${baseName || "property"}${extension}`);
-  },
-});
 
 const allowedMimeTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 
-export const propertyImageUpload = multer({
-  storage,
+const parseUpload = fileUpload({
   limits: {
     fileSize: 5 * 1024 * 1024,
   },
-  fileFilter: (_request, file, callback) => {
-    if (!allowedMimeTypes.has(file.mimetype)) {
-      callback(new AppError("Upload a JPG, PNG, or WebP image.", 400));
+  useTempFiles: false,
+});
+
+export const propertyImageUpload: RequestHandler[] = [
+  parseUpload,
+  (request, _response, next) => {
+    const uploadedFile = request.files?.image;
+
+    if (!uploadedFile || Array.isArray(uploadedFile)) {
+      next(new AppError("Property image is required.", 400));
       return;
     }
 
-    callback(null, true);
+    if (uploadedFile.truncated) {
+      next(new AppError("Image upload failed. Check the file size and try again.", 400));
+      return;
+    }
+
+    if (!allowedMimeTypes.has(uploadedFile.mimetype)) {
+      next(new AppError("Upload a JPG, PNG, or WebP image.", 400));
+      return;
+    }
+
+    request.file = uploadedFile;
+    next();
   },
-});
+];

@@ -6,7 +6,6 @@ import { favouriteRoutes } from "./routes/favouriteRoutes.js";
 import { propertyRoutes } from "./routes/propertyRoutes.js";
 import { env } from "./config.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
-import { uploadsDirectory } from "./utils/uploads.js";
 
 export const app = express();
 
@@ -41,7 +40,6 @@ app.use(
   }),
 );
 app.use(express.json());
-app.use("/uploads", express.static(uploadsDirectory));
 
 app.get("/", (_request, response) => {
   response.json({
