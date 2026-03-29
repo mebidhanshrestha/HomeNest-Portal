@@ -28,7 +28,6 @@ model Property {
   city        String
   price       Int
   imageUrl    String      @map("image_url")
-  imagePublicId String?   @map("image_public_id")
   createdAt   DateTime    @default(now()) @map("created_at")
   createdById Int?        @map("created_by_id")
   creator     User?       @relation("PropertyCreator", fields: [createdById], references: [id], onDelete: SetNull)

@@ -2,7 +2,11 @@ import type { Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../db/prisma.js";
 import { AppError } from "../utils/http.js";
-import { deleteCloudinaryImage, uploadPropertyImage } from "../utils/cloudinary.js";
+import {
+  deleteCloudinaryImage,
+  getCloudinaryPublicIdFromUrl,
+  uploadPropertyImage,
+} from "../utils/cloudinary.js";
 import {
   createPropertySchema,
   propertyListQuerySchema,
@@ -16,7 +20,6 @@ const mapPropertyResponse = (property: {
   city: string;
   price: number;
   imageUrl: string;
-  imagePublicId?: string | null;
   createdAt: Date;
   creator: { id: number; name: string; email: string } | null;
   favourites: { userId: number }[];
@@ -173,7 +176,6 @@ export const createProperty = async (request: Request, response: Response) => {
       data: {
         ...values,
         imageUrl: uploadedImage.secure_url,
-        imagePublicId: uploadedImage.public_id,
         createdById: request.user.sub,
       },
       include: {
@@ -245,8 +247,10 @@ export const deleteProperty = async (request: Request, response: Response) => {
     throw new AppError("Property not found.", 404);
   }
 
-  if (existingProperty.imagePublicId) {
-    await deleteCloudinaryImage(existingProperty.imagePublicId);
+  const imagePublicId = getCloudinaryPublicIdFromUrl(existingProperty.imageUrl);
+
+  if (imagePublicId) {
+    await deleteCloudinaryImage(imagePublicId);
   }
 
   await prisma.property.delete({ where: { id } });
