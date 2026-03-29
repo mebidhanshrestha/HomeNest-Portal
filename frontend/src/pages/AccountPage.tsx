@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Alert, Avatar, Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { useEffect } from "react";
+import { Avatar, Box, CircularProgress, Stack, Typography } from "@mui/material";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
@@ -15,6 +15,7 @@ import { SectionCard } from "../components/ui/SectionCard";
 import { normalizeAppError } from "../lib/api";
 import { usePortalData } from "../hooks/usePortalData";
 import { useAuthStore } from "../stores/authStore";
+import { useToastStore } from "../stores/toastStore";
 
 type ChangePasswordFormValues = {
   currentPassword: string;
@@ -23,8 +24,8 @@ type ChangePasswordFormValues = {
 };
 
 export const AccountPage = () => {
-  const [feedback, setFeedback] = useState<{ severity: "success" | "error"; message: string } | null>(null);
   const clearSession = useAuthStore((state) => state.clearSession);
+  const showToast = useToastStore((state) => state.showToast);
   const {
     user,
     userQuery,
@@ -49,14 +50,20 @@ export const AccountPage = () => {
   const changePasswordMutation = useMutation({
     mutationFn: changePassword,
     onSuccess: (message) => {
-      setFeedback({ severity: "success", message });
+      showToast(message, "success");
       reset();
     },
     onError: (error) => {
       const details = normalizeAppError(error, "We could not update your password.");
-      setFeedback({ severity: "error", message: details.message });
+      showToast(details.message, "error");
     },
   });
+
+  useEffect(() => {
+    if (userError) {
+      showToast(`${userError.message} Showing the last available profile details.`, "warning");
+    }
+  }, [showToast, userError]);
 
   if (userQuery.isLoading && !user) {
     return (
@@ -94,15 +101,6 @@ export const AccountPage = () => {
         title="Account"
         subtitle="Review your account details and update your password."
       />
-
-      {userError ? (
-        <Alert severity="warning" onClose={() => userQuery.refetch()}>
-          {userError.message} Showing the last available profile details.
-        </Alert>
-      ) : null}
-
-      {feedback ? <Alert severity={feedback.severity}>{feedback.message}</Alert> : null}
-
       <SectionCard title="Account details" description="Your current account information.">
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2.5} alignItems={{ sm: "center" }}>
           <Avatar
@@ -134,7 +132,6 @@ export const AccountPage = () => {
           component="form"
           spacing={2}
           onSubmit={handleSubmit((values) => {
-            setFeedback(null);
             changePasswordMutation.mutate(values);
           })}
         >

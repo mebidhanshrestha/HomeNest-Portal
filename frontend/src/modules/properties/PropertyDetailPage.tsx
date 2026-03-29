@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Alert, Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
 import BookmarkOutlinedIcon from "@mui/icons-material/BookmarkOutlined";
@@ -15,11 +14,12 @@ import { SectionCard } from "../../components/ui/SectionCard";
 import { normalizeAppError } from "../../lib/api";
 import { addFavourite, removeFavourite } from "../../services/favouriteService";
 import { deleteProperty, getProperty } from "../../services/propertyService";
+import { useToastStore } from "../../stores/toastStore";
 
 export const PropertyDetailPage = () => {
-  const [feedback, setFeedback] = useState<string | null>(null);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const showToast = useToastStore((state) => state.showToast);
   const propertyId = Number(useParams().id);
   const propertyQuery = useQuery({
     queryKey: ["property", propertyId],
@@ -44,12 +44,16 @@ export const PropertyDetailPage = () => {
       return "Property added to favourites.";
     },
     onSuccess: async (message) => {
-      setFeedback(message);
+      showToast(message, "success");
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["properties"] }),
         queryClient.invalidateQueries({ queryKey: ["property", propertyId] }),
         queryClient.invalidateQueries({ queryKey: ["favourites"] }),
       ]);
+    },
+    onError: (error) => {
+      const details = normalizeAppError(error, "We could not update favourites.");
+      showToast(details.message, "error");
     },
   });
 
@@ -60,18 +64,17 @@ export const PropertyDetailPage = () => {
         queryClient.invalidateQueries({ queryKey: ["properties"] }),
         queryClient.invalidateQueries({ queryKey: ["favourites"] }),
       ]);
+      showToast("Property deleted successfully.", "success");
       navigate("/dashboard/properties", { replace: true });
+    },
+    onError: (error) => {
+      const details = normalizeAppError(error, "We could not delete the property.");
+      showToast(details.message, "error");
     },
   });
 
   const propertyError = propertyQuery.isError
     ? normalizeAppError(propertyQuery.error, "We could not load the property.")
-    : null;
-  const favouriteError = favouriteMutation.isError
-    ? normalizeAppError(favouriteMutation.error, "We could not update favourites.")
-    : null;
-  const deleteError = deleteMutation.isError
-    ? normalizeAppError(deleteMutation.error, "We could not delete the property.")
     : null;
   const property = propertyQuery.data;
 
@@ -97,11 +100,6 @@ export const PropertyDetailPage = () => {
           </Stack>
         }
       />
-
-      {feedback ? <Alert severity="success" onClose={() => setFeedback(null)}>{feedback}</Alert> : null}
-      {favouriteError ? <Alert severity="error">{favouriteError.message}</Alert> : null}
-      {deleteError ? <Alert severity="error">{deleteError.message}</Alert> : null}
-
       {propertyQuery.isLoading ? (
         <Box sx={{ minHeight: "60vh", display: "grid", placeItems: "center" }}>
           <CircularProgress />

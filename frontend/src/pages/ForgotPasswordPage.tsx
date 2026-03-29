@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Alert, Box, Container, Paper, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Container, Paper, Stack, Typography, useTheme } from "@mui/material";
 import MailOutlineOutlinedIcon from "@mui/icons-material/MailOutlineOutlined";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -8,15 +8,16 @@ import { AppButton } from "../components/ui/AppButton";
 import { AppTextField } from "../components/ui/AppTextField";
 import { normalizeAppError } from "../lib/api";
 import { forgotPassword } from "../services/authService";
+import { useToastStore } from "../stores/toastStore";
 
 type ForgotPasswordFormValues = {
   email: string;
 };
 
 export const ForgotPasswordPage = () => {
-  const [message, setMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const theme = useTheme();
+  const showToast = useToastStore((state) => state.showToast);
   const {
     register,
     handleSubmit,
@@ -32,7 +33,7 @@ export const ForgotPasswordPage = () => {
   const forgotMutation = useMutation({
     mutationFn: forgotPassword,
     onSuccess: (data) => {
-      setMessage(data.message);
+      showToast(data.message, "info");
 
       if (data.resetToken) {
         navigate(`/auth/reset?token=${encodeURIComponent(data.resetToken)}`, {
@@ -41,11 +42,11 @@ export const ForgotPasswordPage = () => {
         });
       }
     },
+    onError: (error) => {
+      const details = normalizeAppError(error, "We could not start the password reset flow.");
+      showToast(details.message, "error");
+    },
   });
-
-  const error = forgotMutation.isError
-    ? normalizeAppError(forgotMutation.error, "We could not start the password reset flow.")
-    : null;
 
   return (
     <Box
@@ -73,15 +74,10 @@ export const ForgotPasswordPage = () => {
                 Enter your email to start resetting your password.
               </Typography>
             </Box>
-
-            {message ? <Alert severity="info">{message}</Alert> : null}
-            {error ? <Alert severity="error">{error.message}</Alert> : null}
-
             <Stack
               component="form"
               spacing={2}
               onSubmit={handleSubmit((values) => {
-                setMessage(null);
                 forgotMutation.mutate({ email: values.email.trim() });
               })}
             >

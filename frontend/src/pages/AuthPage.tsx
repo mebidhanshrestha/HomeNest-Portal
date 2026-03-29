@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import type { AlertColor } from "@mui/material";
 import { Box, Container, useTheme } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -7,25 +6,21 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { normalizeAppError } from "../lib/api";
 import { loginUser, registerUser } from "../services/authService";
 import { useAuthStore } from "../stores/authStore";
+import { useToastStore } from "../stores/toastStore";
 import {
   AuthFormCard,
   type AuthFormValues,
   type AuthMode,
 } from "../components/auth/AuthFormCard";
 
-type AuthAlert = {
-  severity: AlertColor;
-  message: string;
-};
-
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const AuthPage = () => {
   const [mode, setMode] = useState<AuthMode>("login");
-  const [formAlert, setFormAlert] = useState<AuthAlert | null>(null);
   const setSession = useAuthStore((state) => state.setSession);
   const authNotice = useAuthStore((state) => state.authNotice);
   const clearAuthNotice = useAuthStore((state) => state.clearAuthNotice);
+  const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
@@ -52,20 +47,20 @@ export const AuthPage = () => {
 
   useEffect(() => {
     if (authNotice) {
-      setFormAlert({ severity: "warning", message: authNotice });
+      showToast(authNotice, "warning");
       clearAuthNotice();
     }
-  }, [authNotice, clearAuthNotice]);
+  }, [authNotice, clearAuthNotice, showToast]);
 
   useEffect(() => {
     if (locationState?.message) {
-      setFormAlert({ severity: "warning", message: locationState.message });
+      showToast(locationState.message, "warning");
       navigate(location.pathname, {
         replace: true,
         state: locationState.from ? { from: locationState.from } : null,
       });
     }
-  }, [location.pathname, locationState?.from, locationState?.message, navigate]);
+  }, [location.pathname, locationState?.from, locationState?.message, navigate, showToast]);
 
   const authMutation = useMutation({
     mutationFn: async (payload: AuthFormValues) => {
@@ -79,7 +74,6 @@ export const AuthPage = () => {
       });
     },
     onSuccess: (data) => {
-      setFormAlert(null);
       setSession(data.token, data.user);
       navigate(redirectTo, { replace: true });
     },
@@ -102,7 +96,7 @@ export const AuthPage = () => {
         }
       });
 
-      setFormAlert({ severity: "error", message: details.message });
+      showToast(details.message, "error");
     },
   });
 
@@ -110,7 +104,6 @@ export const AuthPage = () => {
     name: register("name", {
       onChange: () => {
         clearErrors("name");
-        setFormAlert((current) => (current?.severity === "error" ? null : current));
       },
       validate: (value: string) => {
         if (mode !== "register") {
@@ -123,7 +116,6 @@ export const AuthPage = () => {
     email: register("email", {
       onChange: () => {
         clearErrors("email");
-        setFormAlert((current) => (current?.severity === "error" ? null : current));
       },
       validate: (value: string) =>
         emailPattern.test(value.trim()) || "Enter a valid email address.",
@@ -131,7 +123,6 @@ export const AuthPage = () => {
     password: register("password", {
       onChange: () => {
         clearErrors("password");
-        setFormAlert((current) => (current?.severity === "error" ? null : current));
       },
       validate: (value: string) => {
         if (mode === "login") {
@@ -164,14 +155,12 @@ export const AuthPage = () => {
 
     setMode(nextMode);
     clearErrors();
-    setFormAlert(null);
     reset(currentValues);
   };
 
   const onSubmit = handleSubmit(
     (values) => {
       clearErrors();
-      setFormAlert(null);
 
       authMutation.mutate({
         name: values.name.trim(),
@@ -180,10 +169,7 @@ export const AuthPage = () => {
       });
     },
     () => {
-      setFormAlert({
-        severity: "error",
-        message: "Please fix the highlighted fields and try again.",
-      });
+      showToast("Please fix the highlighted fields and try again.", "error");
     },
   );
 
@@ -210,7 +196,6 @@ export const AuthPage = () => {
       <Container maxWidth="sm">
         <AuthFormCard
           mode={mode}
-          alert={formAlert}
           fieldErrors={errors}
           isPending={authMutation.isPending}
           formFields={authRegister}

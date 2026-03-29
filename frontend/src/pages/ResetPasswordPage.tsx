@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert, Box, Container, Paper, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Container, Paper, Stack, Typography, useTheme } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -8,6 +8,7 @@ import { AppButton } from "../components/ui/AppButton";
 import { AppTextField } from "../components/ui/AppTextField";
 import { normalizeAppError } from "../lib/api";
 import { resetPassword } from "../services/authService";
+import { useToastStore } from "../stores/toastStore";
 
 type ResetPasswordFormValues = {
   newPassword: string;
@@ -15,11 +16,11 @@ type ResetPasswordFormValues = {
 };
 
 export const ResetPasswordPage = () => {
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
+  const showToast = useToastStore((state) => state.showToast);
   const token = searchParams.get("token") ?? "";
   const locationState = location.state as { message?: string } | null;
   const {
@@ -44,10 +45,16 @@ export const ResetPasswordPage = () => {
     }
   }, [navigate, token]);
 
+  useEffect(() => {
+    if (locationState?.message) {
+      showToast(locationState.message, "info");
+    }
+  }, [locationState?.message, showToast]);
+
   const resetMutation = useMutation({
     mutationFn: resetPassword,
     onSuccess: (message) => {
-      setSuccessMessage(message);
+      showToast(message, "success");
       window.setTimeout(() => {
         navigate("/auth", {
           replace: true,
@@ -55,11 +62,11 @@ export const ResetPasswordPage = () => {
         });
       }, 1200);
     },
+    onError: (error) => {
+      const details = normalizeAppError(error, "We could not reset your password.");
+      showToast(details.message, "error");
+    },
   });
-
-  const error = resetMutation.isError
-    ? normalizeAppError(resetMutation.error, "We could not reset your password.")
-    : null;
 
   return (
     <Box
@@ -87,16 +94,10 @@ export const ResetPasswordPage = () => {
                 Choose a new password for your account.
               </Typography>
             </Box>
-
-            {locationState?.message ? <Alert severity="info">{locationState.message}</Alert> : null}
-            {successMessage ? <Alert severity="success">{successMessage}</Alert> : null}
-            {error ? <Alert severity="error">{error.message}</Alert> : null}
-
             <Stack
               component="form"
               spacing={2}
               onSubmit={handleSubmit((values) => {
-                setSuccessMessage(null);
                 resetMutation.mutate({
                   token,
                   newPassword: values.newPassword,

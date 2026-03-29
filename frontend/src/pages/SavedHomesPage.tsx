@@ -1,4 +1,5 @@
-import { Alert, Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { useEffect } from "react";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import { useNavigate } from "react-router-dom";
@@ -10,23 +11,29 @@ import { PageHeader } from "../components/ui/PageHeader";
 import { SectionCard } from "../components/ui/SectionCard";
 import { usePortalData } from "../hooks/usePortalData";
 import { useAuthStore } from "../stores/authStore";
+import { useToastStore } from "../stores/toastStore";
 
 export const SavedHomesPage = () => {
   const navigate = useNavigate();
   const clearSession = useAuthStore((state) => state.clearSession);
+  const showToast = useToastStore((state) => state.showToast);
   const {
     user,
     favourites,
-    feedback,
     busyPropertyId,
     userQuery,
     favouritesQuery,
     blockingUserError,
     userError,
     favouritesError,
-    clearFeedback,
     toggleFavourite,
   } = usePortalData();
+
+  useEffect(() => {
+    if (userError) {
+      showToast(`${userError.message} Showing the last available profile details.`, "warning");
+    }
+  }, [showToast, userError]);
 
   if (userQuery.isLoading && !user) {
     return (
@@ -69,19 +76,6 @@ export const SavedHomesPage = () => {
           </Typography>
         }
       />
-
-      {userError ? (
-        <Alert severity="warning" onClose={() => userQuery.refetch()}>
-          {userError.message} Showing the last available profile details.
-        </Alert>
-      ) : null}
-
-      {feedback ? (
-        <Alert severity={feedback.severity} onClose={clearFeedback}>
-          {feedback.message}
-        </Alert>
-      ) : null}
-
       <SectionCard
         title="Saved homes"
         description="Everything you have shortlisted appears here."

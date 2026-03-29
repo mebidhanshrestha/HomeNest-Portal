@@ -5,24 +5,20 @@ import { addFavourite, getFavourites, removeFavourite } from "../services/favour
 import { getCurrentUser } from "../services/authService";
 import { getProperties } from "../services/propertyService";
 import { useAuthStore } from "../stores/authStore";
+import { useToastStore } from "../stores/toastStore";
 import type { Property } from "../types";
 
 const propertiesQueryKey = ["properties"];
 const favouritesQueryKey = ["favourites"];
 const meQueryKey = ["me"];
 
-type PortalFeedback = {
-  message: string;
-  severity: "success" | "error";
-} | null;
-
 export const usePortalData = () => {
-  const [feedback, setFeedback] = useState<PortalFeedback>(null);
   const [busyPropertyId, setBusyPropertyId] = useState<number | null>(null);
   const setSession = useAuthStore((state) => state.setSession);
   const token = useAuthStore((state) => state.token);
   const storedUser = useAuthStore((state) => state.user);
   const queryClient = useQueryClient();
+  const showToast = useToastStore((state) => state.showToast);
 
   const userQuery = useQuery({
     queryKey: meQueryKey,
@@ -52,17 +48,23 @@ export const usePortalData = () => {
     mutationFn: async (property: Property) => {
       if (property.isFavourite) {
         await removeFavourite(property.id);
-        return "Property removed from favourites.";
+        return {
+          message: "Property removed from favourites.",
+          severity: "error" as const,
+        };
       }
 
       await addFavourite(property.id);
-      return "Property added to favourites.";
+      return {
+        message: "Property added to favourites.",
+        severity: "success" as const,
+      };
     },
     onMutate: (property) => {
       setBusyPropertyId(property.id);
     },
-    onSuccess: async (message) => {
-      setFeedback({ message, severity: "success" });
+    onSuccess: async ({ message, severity }) => {
+      showToast(message, severity);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: propertiesQueryKey }),
         queryClient.invalidateQueries({ queryKey: favouritesQueryKey }),
@@ -73,7 +75,7 @@ export const usePortalData = () => {
         error,
         "We could not update favourites. Please try again.",
       );
-      setFeedback({ message: details.message, severity: "error" });
+      showToast(details.message, "error");
     },
     onSettled: () => {
       setBusyPropertyId(null);
@@ -116,7 +118,6 @@ export const usePortalData = () => {
     favourites,
     cities,
     averagePrice,
-    feedback,
     busyPropertyId,
     userQuery,
     propertiesQuery,
@@ -126,7 +127,6 @@ export const usePortalData = () => {
     userError,
     propertiesError,
     favouritesError,
-    clearFeedback: () => setFeedback(null),
     toggleFavourite: (property: Property) => favouriteMutation.mutate(property),
   };
 };

@@ -1,4 +1,4 @@
-import { Alert, Box, CircularProgress, Stack } from "@mui/material";
+import { Box, CircularProgress, Stack } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppButton } from "../../components/ui/AppButton";
@@ -7,11 +7,13 @@ import { PageHeader } from "../../components/ui/PageHeader";
 import { SectionCard } from "../../components/ui/SectionCard";
 import { normalizeAppError } from "../../lib/api";
 import { getProperty, updateProperty, type PropertyPayload } from "../../services/propertyService";
+import { useToastStore } from "../../stores/toastStore";
 import { PropertyForm } from "./PropertyForm";
 
 export const PropertyEditPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const showToast = useToastStore((state) => state.showToast);
   const propertyId = Number(useParams().id);
   const propertyQuery = useQuery({
     queryKey: ["property", propertyId],
@@ -25,15 +27,17 @@ export const PropertyEditPage = () => {
         queryClient.invalidateQueries({ queryKey: ["properties"] }),
         queryClient.invalidateQueries({ queryKey: ["property", property.id] }),
       ]);
+      showToast("Property updated successfully.", "success");
       navigate(`/dashboard/properties/${property.id}`);
+    },
+    onError: (error) => {
+      const details = normalizeAppError(error, "We could not update the property.");
+      showToast(details.message, "error");
     },
   });
 
   const propertyError = propertyQuery.isError
     ? normalizeAppError(propertyQuery.error, "We could not load the property.")
-    : null;
-  const updateError = updateMutation.isError
-    ? normalizeAppError(updateMutation.error, "We could not update the property.")
     : null;
 
   return (
@@ -60,7 +64,6 @@ export const PropertyEditPage = () => {
           />
         ) : (
           <>
-            {updateError ? <Alert severity="error">{updateError.message}</Alert> : null}
             <PropertyForm
               defaultValues={{
                 title: propertyQuery.data.title,

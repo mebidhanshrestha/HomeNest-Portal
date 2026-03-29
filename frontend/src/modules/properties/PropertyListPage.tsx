@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Alert, Box, CircularProgress, Grid2, Stack, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Box, CircularProgress, Grid2, Stack, Typography } from "@mui/material";
 import AddHomeOutlinedIcon from "@mui/icons-material/AddHomeOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
@@ -13,27 +13,33 @@ import { PageHeader } from "../../components/ui/PageHeader";
 import { SectionCard } from "../../components/ui/SectionCard";
 import { usePortalData } from "../../hooks/usePortalData";
 import { useAuthStore } from "../../stores/authStore";
+import { useToastStore } from "../../stores/toastStore";
 
 export const PropertyListPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCity, setSelectedCity] = useState("all");
   const [showSavedOnly, setShowSavedOnly] = useState(false);
   const clearSession = useAuthStore((state) => state.clearSession);
+  const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
   const {
     user,
     properties,
-    feedback,
     busyPropertyId,
     userQuery,
     propertiesQuery,
     blockingUserError,
     userError,
     propertiesError,
-    clearFeedback,
     toggleFavourite,
     cities,
   } = usePortalData();
+
+  useEffect(() => {
+    if (userError) {
+      showToast(`${userError.message} Showing the last available profile details.`, "warning");
+    }
+  }, [showToast, userError]);
 
   const filteredProperties = properties.filter((property) => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -93,19 +99,6 @@ export const PropertyListPage = () => {
           </Stack>
         }
       />
-
-      {userError ? (
-        <Alert severity="warning" onClose={() => userQuery.refetch()}>
-          {userError.message} Showing the last available profile details.
-        </Alert>
-      ) : null}
-
-      {feedback ? (
-        <Alert severity={feedback.severity} onClose={clearFeedback}>
-          {feedback.message}
-        </Alert>
-      ) : null}
-
       {!propertiesError ? (
         <PropertyFilters
           searchTerm={searchTerm}

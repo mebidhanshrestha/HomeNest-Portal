@@ -1,4 +1,5 @@
-import { Alert, Box, CircularProgress, Grid2, Stack, Typography } from "@mui/material";
+import { useEffect } from "react";
+import { Box, CircularProgress, Grid2, Stack, Typography } from "@mui/material";
 import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
@@ -15,26 +16,32 @@ import { SectionCard } from "../components/ui/SectionCard";
 import { StatCard } from "../components/ui/StatCard";
 import { usePortalData } from "../hooks/usePortalData";
 import { useAuthStore } from "../stores/authStore";
+import { useToastStore } from "../stores/toastStore";
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
   const clearSession = useAuthStore((state) => state.clearSession);
+  const showToast = useToastStore((state) => state.showToast);
   const {
     user,
     properties,
     favourites,
     cities,
     averagePrice,
-    feedback,
     busyPropertyId,
     userQuery,
     favouritesQuery,
     blockingUserError,
     userError,
     favouritesError,
-    clearFeedback,
     toggleFavourite,
   } = usePortalData();
+
+  useEffect(() => {
+    if (userError) {
+      showToast(`${userError.message} Showing the last available profile details.`, "warning");
+    }
+  }, [showToast, userError]);
 
   if (userQuery.isLoading && !user) {
     return (
@@ -80,19 +87,6 @@ export const DashboardPage = () => {
           </Typography>
         }
       />
-
-      {userError ? (
-        <Alert severity="warning" onClose={() => userQuery.refetch()}>
-          {userError.message} Showing the last available profile details.
-        </Alert>
-      ) : null}
-
-      {feedback ? (
-        <Alert severity={feedback.severity} onClose={clearFeedback}>
-          {feedback.message}
-        </Alert>
-      ) : null}
-
       <Grid2 container spacing={3}>
         <Grid2 size={{ xs: 12, md: 6, xl: 3 }}>
           <StatCard

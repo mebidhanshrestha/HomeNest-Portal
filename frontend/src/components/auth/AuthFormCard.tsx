@@ -1,7 +1,5 @@
 import { useState, type FormEventHandler } from "react";
 import {
-  Alert,
-  type AlertColor,
   Box,
   IconButton,
   InputAdornment,
@@ -31,10 +29,6 @@ export type AuthFormValues = {
 
 type AuthFormCardProps = {
   mode: AuthMode;
-  alert: {
-    severity: AlertColor;
-    message: string;
-  } | null;
   fieldErrors: FieldErrors<AuthFormValues>;
   isPending: boolean;
   formFields: {
@@ -49,7 +43,6 @@ type AuthFormCardProps = {
 
 export const AuthFormCard = ({
   mode,
-  alert,
   fieldErrors,
   isPending,
   formFields,
@@ -102,12 +95,6 @@ export const AuthFormCard = ({
               </Typography>
             </Box>
           </Stack>
-
-          {alert && (
-            <Alert severity={alert.severity} sx={{ mt: 2 }}>
-              {alert.message}
-            </Alert>
-          )}
 
           <Stack component="form" spacing={2} onSubmit={onSubmit}>
             {mode === "register" && (

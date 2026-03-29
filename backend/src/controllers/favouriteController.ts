@@ -23,6 +23,8 @@ export const listFavourites = async (request: Request, response: Response) => {
       city: property.city,
       price: property.price,
       imageUrl: property.imageUrl,
+      createdAt: property.createdAt.toISOString(),
+      isFavourite: true,
     })),
   });
 };
