@@ -12,6 +12,8 @@ model User {
   name         String
   email        String      @unique
   passwordHash String      @map("password_hash")
+  resetPasswordToken String?   @map("reset_password_token")
+  resetPasswordExpiresAt DateTime? @map("reset_password_expires_at")
   role         String      @default("buyer")
   createdAt    DateTime    @default(now()) @map("created_at")
   favourites   Favourite[]

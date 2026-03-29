@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import multer from "multer";
 import { ZodError } from "zod";
 import { AppError } from "../utils/http.js";
 
@@ -17,6 +18,11 @@ export const errorHandler = (
       message: "Validation failed.",
       errors: error.flatten().fieldErrors,
     });
+    return;
+  }
+
+  if (error instanceof multer.MulterError) {
+    response.status(400).json({ message: "Image upload failed. Check the file size and try again." });
     return;
   }
 

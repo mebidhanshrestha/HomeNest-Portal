@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type FormEventHandler } from "react";
 import {
   Alert,
   type AlertColor,
@@ -10,6 +10,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import type { FieldErrors, UseFormRegisterReturn } from "react-hook-form";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import MailOutlineOutlinedIcon from "@mui/icons-material/MailOutlineOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
@@ -17,39 +18,43 @@ import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import homeNestLogo from "../../assets/images/home-nest.png";
 import { AppButton } from "../ui/AppButton";
 import { AppTextField } from "../ui/AppTextField";
-import homeNestLogo from "../../assets/images/home-nest.png";
 
 export type AuthMode = "login" | "register";
-export type AuthField = "name" | "email" | "password";
+export type AuthFormValues = {
+  name: string;
+  email: string;
+  password: string;
+};
 
 type AuthFormCardProps = {
   mode: AuthMode;
-  formValues: {
-    name: string;
-    email: string;
-    password: string;
-  };
   alert: {
     severity: AlertColor;
     message: string;
   } | null;
-  fieldErrors: Partial<Record<AuthField, string>>;
+  fieldErrors: FieldErrors<AuthFormValues>;
   isPending: boolean;
+  formFields: {
+    name: UseFormRegisterReturn<"name">;
+    email: UseFormRegisterReturn<"email">;
+    password: UseFormRegisterReturn<"password">;
+  };
   onModeChange: (mode: AuthMode) => void;
-  onFieldChange: (field: AuthField, value: string) => void;
-  onSubmit: () => void;
+  onForgotPassword: () => void;
+  onSubmit: FormEventHandler<HTMLFormElement>;
 };
 
 export const AuthFormCard = ({
   mode,
-  formValues,
   alert,
   fieldErrors,
   isPending,
+  formFields,
   onModeChange,
-  onFieldChange,
+  onForgotPassword,
   onSubmit,
 }: AuthFormCardProps) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -104,23 +109,15 @@ export const AuthFormCard = ({
             </Alert>
           )}
 
-          <Stack
-            component="form"
-            spacing={2}
-            onSubmit={(event) => {
-              event.preventDefault();
-              onSubmit();
-            }}
-          >
+          <Stack component="form" spacing={2} onSubmit={onSubmit}>
             {mode === "register" && (
               <AppTextField
                 label="Full name"
-                value={formValues.name}
-                onChange={(event) => onFieldChange("name", event.target.value)}
                 error={Boolean(fieldErrors.name)}
-                helperText={fieldErrors.name}
+                helperText={fieldErrors.name?.message}
                 required
                 autoComplete="name"
+                {...formFields.name}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -134,12 +131,11 @@ export const AuthFormCard = ({
             <AppTextField
               label="Email"
               type="email"
-              value={formValues.email}
-              onChange={(event) => onFieldChange("email", event.target.value)}
               error={Boolean(fieldErrors.email)}
-              helperText={fieldErrors.email}
+              helperText={fieldErrors.email?.message}
               required
               autoComplete="email"
+              {...formFields.email}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -152,12 +148,11 @@ export const AuthFormCard = ({
             <AppTextField
               label="Password"
               type={showPassword ? "text" : "password"}
-              value={formValues.password}
-              onChange={(event) => onFieldChange("password", event.target.value)}
               error={Boolean(fieldErrors.password)}
-              helperText={fieldErrors.password}
+              helperText={fieldErrors.password?.message}
               required
               autoComplete={mode === "login" ? "current-password" : "new-password"}
+              {...formFields.password}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -197,6 +192,26 @@ export const AuthFormCard = ({
                   ? "Sign in"
                   : "Create account"}
             </AppButton>
+
+            {mode === "login" ? (
+              <Box sx={{ textAlign: "right" }}>
+                <Box
+                  component="button"
+                  type="button"
+                  onClick={onForgotPassword}
+                  sx={{
+                    border: 0,
+                    p: 0,
+                    background: "transparent",
+                    color: "primary.main",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                  }}
+                >
+                  Forgot password?
+                </Box>
+              </Box>
+            ) : null}
           </Stack>
         </Stack>
       </Paper>

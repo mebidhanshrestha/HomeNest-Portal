@@ -19,9 +19,15 @@ type PropertyCardProps = {
   property: Property;
   onToggleFavourite: (property: Property) => void;
   busy?: boolean;
+  onViewDetails?: (property: Property) => void;
 };
 
-export const PropertyCard = ({ property, onToggleFavourite, busy }: PropertyCardProps) => {
+export const PropertyCard = ({
+  property,
+  onToggleFavourite,
+  busy,
+  onViewDetails,
+}: PropertyCardProps) => {
   const [imageFailed, setImageFailed] = useState(false);
 
   return (
@@ -119,22 +125,28 @@ export const PropertyCard = ({ property, onToggleFavourite, busy }: PropertyCard
           </Typography>
         </Stack>
 
-        <AppButton
-          fullWidth
-          variant={property.isFavourite ? "outlined" : "contained"}
-          startIcon={
-            property.isFavourite ? (
-              <BookmarkOutlinedIcon />
-            ) : (
-              <BookmarkBorderOutlinedIcon />
-            )
-          }
-          onClick={() => onToggleFavourite(property)}
-          disabled={busy}
-          sx={{ mt: "auto" }}
-        >
-          {property.isFavourite ? "Remove" : "Save property"}
-        </AppButton>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25} sx={{ mt: "auto" }}>
+          {onViewDetails ? (
+            <AppButton fullWidth variant="outlined" onClick={() => onViewDetails(property)}>
+              View details
+            </AppButton>
+          ) : null}
+          <AppButton
+            fullWidth
+            variant={property.isFavourite ? "outlined" : "contained"}
+            startIcon={
+              property.isFavourite ? (
+                <BookmarkOutlinedIcon />
+              ) : (
+                <BookmarkBorderOutlinedIcon />
+              )
+            }
+            onClick={() => onToggleFavourite(property)}
+            disabled={busy}
+          >
+            {property.isFavourite ? "Remove" : "Save property"}
+          </AppButton>
+        </Stack>
       </Stack>
     </Card>
   );

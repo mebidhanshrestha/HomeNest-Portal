@@ -18,16 +18,16 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import GridViewIcon from "@mui/icons-material/GridView";
-import HomeWorkIcon from "@mui/icons-material/HomeWork";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import LogoutIcon from "@mui/icons-material/Logout";
-import MenuIcon from "@mui/icons-material/Menu";
-import PersonIcon from "@mui/icons-material/Person";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
+import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
+import GridViewOutlinedIcon from "@mui/icons-material/GridViewOutlined";
+import HomeWorkOutlinedIcon from "@mui/icons-material/HomeWorkOutlined";
+import KeyboardArrowLeftOutlinedIcon from "@mui/icons-material/KeyboardArrowLeftOutlined";
+import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
+import LightModeOutlinedIcon from "@mui/icons-material/LightModeOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { useThemeStore } from "../stores/themeStore";
@@ -42,25 +42,25 @@ const navigationItems = [
   {
     label: "Overview",
     path: "/dashboard",
-    icon: <GridViewIcon />,
+    icon: <GridViewOutlinedIcon />,
     matches: (pathname: string) => pathname === "/dashboard" || pathname === "/dashboard/overview",
   },
   {
-    label: "Listings",
-    path: "/dashboard/listings",
-    icon: <HomeWorkIcon />,
-    matches: (pathname: string) => pathname.startsWith("/dashboard/listings"),
+    label: "Properties",
+    path: "/dashboard/properties",
+    icon: <HomeWorkOutlinedIcon />,
+    matches: (pathname: string) => pathname.startsWith("/dashboard/properties"),
   },
   {
     label: "Saved",
     path: "/dashboard/saved",
-    icon: <BookmarkIcon />,
+    icon: <BookmarkBorderOutlinedIcon />,
     matches: (pathname: string) => pathname.startsWith("/dashboard/saved"),
   },
   {
     label: "Account",
     path: "/dashboard/account",
-    icon: <PersonIcon />,
+    icon: <PersonOutlineOutlinedIcon />,
     matches: (pathname: string) => pathname.startsWith("/dashboard/account"),
   },
 ];
@@ -130,9 +130,12 @@ export const AppLayout = () => {
         sx={{
           px: sidebarExpanded ? 2.5 : 1.5,
           py: 2,
-          minHeight: sidebarExpanded ? 72 : 64,
+          minHeight: 72,
+          justifyContent: sidebarExpanded ? "space-between" : "center",
           borderBottom: "1px solid",
           borderColor: "divider",
+          position: "relative",
+          overflow: "visible",
         }}
       >
         <Box
@@ -147,20 +150,6 @@ export const AppLayout = () => {
             flexShrink: 0,
           }}
         />
-        {sidebarExpanded && <Box sx={{ flexGrow: 1 }} />}
-        <IconButton
-          onClick={handleDrawerToggle}
-          size="small"
-          sx={(theme) => ({
-            color: "text.secondary",
-            bgcolor: alpha(theme.palette.text.primary, 0.04),
-            "&:hover": {
-              bgcolor: alpha(theme.palette.text.primary, 0.08),
-            },
-          })}
-        >
-          {sidebarExpanded ? <ChevronLeftIcon fontSize="small" /> : <ChevronRightIcon fontSize="small" />}
-        </IconButton>
       </Stack>
 
       <List sx={{ px: 1.25, py: 1.5, flexGrow: 1 }}>
@@ -221,48 +210,6 @@ export const AppLayout = () => {
         })}
       </List>
 
-      <Divider />
-      
-      <Box sx={{ p: 1.5 }}>
-        <Stack
-          direction={sidebarExpanded ? "row" : "column"}
-          spacing={sidebarExpanded ? 1.5 : 1}
-          alignItems="center"
-          sx={(theme) => ({
-            px: sidebarExpanded ? 1.5 : 1,
-            py: 1.5,
-            borderRadius: 2,
-            cursor: "pointer",
-            transition: "background-color 150ms ease",
-            "&:hover": {
-              bgcolor: alpha(theme.palette.text.primary, 0.04),
-            },
-          })}
-          onClick={(e) => setProfileAnchorEl(e.currentTarget)}
-        >
-          <Avatar
-            sx={{
-              width: 36,
-              height: 36,
-              bgcolor: "primary.main",
-              color: "primary.contrastText",
-              fontSize: "0.875rem",
-            }}
-          >
-            {userInitial}
-          </Avatar>
-          {sidebarExpanded && (
-            <Box sx={{ minWidth: 0, flexGrow: 1 }}>
-              <Typography variant="subtitle2" noWrap fontWeight={600}>
-                {user?.name ?? "Buyer"}
-              </Typography>
-              <Typography variant="caption" color="text.secondary" noWrap>
-                {user?.email ?? "Signed in"}
-              </Typography>
-            </Box>
-          )}
-        </Stack>
-      </Box>
     </Stack>
   );
 
@@ -294,13 +241,15 @@ export const AppLayout = () => {
           display: { xs: "none", lg: "block" },
           width: desktopOpen ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
           flexShrink: 0,
+          overflow: "visible",
           "& .MuiDrawer-paper": {
             width: desktopOpen ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH,
             boxSizing: "border-box",
             borderRight: "1px solid",
             borderColor: "divider",
             bgcolor: "background.paper",
-            overflowX: "hidden",
+            overflowX: "visible",
+            overflowY: "hidden",
             transition: theme.transitions.create("width", {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
@@ -310,6 +259,39 @@ export const AppLayout = () => {
       >
         {sidebarContent}
       </Drawer>
+
+      {isDesktop ? (
+        <IconButton
+          onClick={handleDrawerToggle}
+          size="small"
+          sx={(theme) => ({
+            position: "fixed",
+            top: 36,
+            left: (desktopOpen ? DRAWER_WIDTH : COLLAPSED_DRAWER_WIDTH) - 18,
+            transform: "translateY(-50%)",
+            color: "text.secondary",
+            bgcolor: theme.palette.background.paper,
+            width: 36,
+            height: 36,
+            border: "1px solid",
+            borderColor: "divider",
+            boxShadow:
+              theme.palette.mode === "light"
+                ? "0 6px 16px rgba(15, 23, 42, 0.12)"
+                : "0 10px 24px rgba(0, 0, 0, 0.34)",
+            zIndex: theme.zIndex.drawer + 2,
+            "&:hover": {
+              bgcolor: alpha(theme.palette.background.paper, 0.96),
+            },
+          })}
+        >
+          {sidebarExpanded ? (
+            <KeyboardArrowLeftOutlinedIcon fontSize="small" />
+          ) : (
+            <KeyboardArrowRightOutlinedIcon fontSize="small" />
+          )}
+        </IconButton>
+      ) : null}
 
       <Box
         component="main"
@@ -327,6 +309,7 @@ export const AppLayout = () => {
             gap: 2,
             px: { xs: 2, md: 3 },
             py: { xs: 1.5, md: 2 },
+            minHeight: 72,
             borderBottom: "1px solid",
             borderColor: "divider",
             bgcolor: alpha(theme.palette.background.paper, 0.8),
@@ -342,7 +325,7 @@ export const AppLayout = () => {
               onClick={handleDrawerToggle}
               sx={{ color: "text.secondary" }}
             >
-              <MenuIcon />
+              <MenuOutlinedIcon />
             </IconButton>
           )}
 
@@ -413,15 +396,14 @@ export const AppLayout = () => {
           sx={{ py: 1.25 }}
         >
           {mode === "light" ? (
-            <DarkModeIcon fontSize="small" sx={{ mr: 1.5, color: "text.secondary" }} />
+            <DarkModeOutlinedIcon fontSize="small" sx={{ mr: 1.5, color: "text.secondary" }} />
           ) : (
-            <LightModeIcon fontSize="small" sx={{ mr: 1.5, color: "text.secondary" }} />
+            <LightModeOutlinedIcon fontSize="small" sx={{ mr: 1.5, color: "text.secondary" }} />
           )}
           <Typography sx={{ flexGrow: 1 }} variant="body2">
             Dark mode
           </Typography>
           <Switch
-            edge="end"
             size="small"
             checked={mode === "dark"}
             onChange={() => {
@@ -429,6 +411,7 @@ export const AppLayout = () => {
               handleProfileClose();
             }}
             onClick={(event) => event.stopPropagation()}
+            sx={{ ml: 1.5, flexShrink: 0 }}
           />
         </MenuItem>
         <MenuItem
@@ -438,12 +421,12 @@ export const AppLayout = () => {
           }}
           sx={{ py: 1.25 }}
         >
-          <PersonIcon fontSize="small" sx={{ mr: 1.5, color: "text.secondary" }} />
+          <PersonOutlineOutlinedIcon fontSize="small" sx={{ mr: 1.5, color: "text.secondary" }} />
           <Typography variant="body2">Account settings</Typography>
         </MenuItem>
         <Divider />
         <MenuItem onClick={handleLogout} sx={{ py: 1.25 }}>
-          <LogoutIcon fontSize="small" sx={{ mr: 1.5, color: "text.secondary" }} />
+          <LogoutOutlinedIcon fontSize="small" sx={{ mr: 1.5, color: "text.secondary" }} />
           <Typography variant="body2">Sign out</Typography>
         </MenuItem>
       </Menu>

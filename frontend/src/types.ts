@@ -11,6 +11,7 @@ export type Property = {
   city: string;
   price: number;
   imageUrl: string;
+  createdAt: string;
   isFavourite?: boolean;
 };
 

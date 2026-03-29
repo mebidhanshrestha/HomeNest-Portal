@@ -5,8 +5,13 @@ import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { AuthPage } from "./pages/AuthPage";
 import { AccountPage } from "./pages/AccountPage";
 import { DashboardPage } from "./pages/DashboardPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
+import { PropertyCreatePage } from "./modules/properties/PropertyCreatePage";
+import { PropertyDetailPage } from "./modules/properties/PropertyDetailPage";
+import { PropertyEditPage } from "./modules/properties/PropertyEditPage";
+import { PropertyListPage } from "./modules/properties/PropertyListPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
-import { PropertiesPage } from "./pages/PropertiesPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { SavedHomesPage } from "./pages/SavedHomesPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AppLayout } from "./components/AppLayout";
@@ -43,6 +48,8 @@ function App() {
                 element={<Navigate to={token ? "/dashboard" : "/auth"} replace />}
               />
               <Route path="/auth" element={<AuthPage />} />
+              <Route path="/auth/forgot" element={<ForgotPasswordPage />} />
+              <Route path="/auth/reset" element={<ResetPasswordPage />} />
               <Route
                 path="/dashboard"
                 element={
@@ -53,7 +60,10 @@ function App() {
               >
                 <Route index element={<DashboardPage />} />
                 <Route path="overview" element={<DashboardPage />} />
-                <Route path="listings" element={<PropertiesPage />} />
+                <Route path="properties" element={<PropertyListPage />} />
+                <Route path="properties/new" element={<PropertyCreatePage />} />
+                <Route path="properties/:id" element={<PropertyDetailPage />} />
+                <Route path="properties/:id/edit" element={<PropertyEditPage />} />
                 <Route path="saved" element={<SavedHomesPage />} />
                 <Route path="account" element={<AccountPage />} />
               </Route>

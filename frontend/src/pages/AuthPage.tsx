@@ -2,21 +2,16 @@ import { useEffect, useState } from "react";
 import type { AlertColor } from "@mui/material";
 import { Box, Container, useTheme } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import { normalizeAppError } from "../lib/api";
-import { useAuthStore } from "../stores/authStore";
 import { loginUser, registerUser } from "../services/authService";
+import { useAuthStore } from "../stores/authStore";
 import {
   AuthFormCard,
-  type AuthField,
+  type AuthFormValues,
   type AuthMode,
 } from "../components/auth/AuthFormCard";
-
-type AuthFormValues = {
-  name: string;
-  email: string;
-  password: string;
-};
 
 type AuthAlert = {
   severity: AlertColor;
@@ -25,50 +20,9 @@ type AuthAlert = {
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const validateAuthForm = (
-  mode: AuthMode,
-  values: AuthFormValues,
-): Partial<Record<AuthField, string>> => {
-  const errors: Partial<Record<AuthField, string>> = {};
-
-  if (mode === "register" && values.name.trim().length < 2) {
-    errors.name = "Name must be at least 2 characters.";
-  }
-
-  if (!emailPattern.test(values.email.trim())) {
-    errors.email = "Enter a valid email address.";
-  }
-
-  if (mode === "login") {
-    if (!values.password) {
-      errors.password = "Password is required.";
-    }
-
-    return errors;
-  }
-
-  if (values.password.length < 8) {
-    errors.password = "Password must be at least 8 characters.";
-  } else if (!/[A-Z]/.test(values.password)) {
-    errors.password = "Password must include at least one uppercase letter.";
-  } else if (!/[a-z]/.test(values.password)) {
-    errors.password = "Password must include at least one lowercase letter.";
-  } else if (!/[0-9]/.test(values.password)) {
-    errors.password = "Password must include at least one number.";
-  }
-
-  return errors;
-};
-
 export const AuthPage = () => {
   const [mode, setMode] = useState<AuthMode>("login");
   const [formAlert, setFormAlert] = useState<AuthAlert | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Partial<Record<AuthField, string>>>({});
-  const [formValues, setFormValues] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
   const setSession = useAuthStore((state) => state.setSession);
   const authNotice = useAuthStore((state) => state.authNotice);
   const clearAuthNotice = useAuthStore((state) => state.clearAuthNotice);
@@ -77,6 +31,24 @@ export const AuthPage = () => {
   const theme = useTheme();
   const locationState = location.state as { from?: string; message?: string } | null;
   const redirectTo = locationState?.from ?? "/dashboard";
+  const {
+    clearErrors,
+    formState: { errors },
+    getValues,
+    handleSubmit,
+    register,
+    reset,
+    setError,
+  } = useForm<AuthFormValues>({
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+    shouldUnregister: true,
+  });
 
   useEffect(() => {
     if (authNotice) {
@@ -96,13 +68,7 @@ export const AuthPage = () => {
   }, [location.pathname, locationState?.from, locationState?.message, navigate]);
 
   const authMutation = useMutation({
-    mutationFn: async () => {
-      const payload = {
-        name: formValues.name.trim(),
-        email: formValues.email.trim(),
-        password: formValues.password,
-      };
-
+    mutationFn: async (payload: AuthFormValues) => {
       if (mode === "register") {
         return registerUser(payload);
       }
@@ -113,7 +79,6 @@ export const AuthPage = () => {
       });
     },
     onSuccess: (data) => {
-      setFieldErrors({});
       setFormAlert(null);
       setSession(data.token, data.user);
       navigate(redirectTo, { replace: true });
@@ -126,59 +91,101 @@ export const AuthPage = () => {
           : "We could not create your account. Please try again.",
       );
 
-      setFieldErrors(
-        Object.entries(details.fieldErrors).reduce<Partial<Record<AuthField, string>>>(
-          (accumulator, [field, messages]) => {
-            if (field === "name" || field === "email" || field === "password") {
-              accumulator[field] = messages[0];
-            }
+      Object.entries(details.fieldErrors).forEach(([field, messages]) => {
+        const message = messages[0];
 
-            return accumulator;
-          },
-          {},
-        ),
-      );
+        if ((field === "name" || field === "email" || field === "password") && message) {
+          setError(field, {
+            type: "server",
+            message,
+          });
+        }
+      });
+
       setFormAlert({ severity: "error", message: details.message });
     },
   });
 
+  const authRegister = {
+    name: register("name", {
+      onChange: () => {
+        clearErrors("name");
+        setFormAlert((current) => (current?.severity === "error" ? null : current));
+      },
+      validate: (value: string) => {
+        if (mode !== "register") {
+          return true;
+        }
+
+        return value.trim().length >= 2 || "Name must be at least 2 characters.";
+      },
+    }),
+    email: register("email", {
+      onChange: () => {
+        clearErrors("email");
+        setFormAlert((current) => (current?.severity === "error" ? null : current));
+      },
+      validate: (value: string) =>
+        emailPattern.test(value.trim()) || "Enter a valid email address.",
+    }),
+    password: register("password", {
+      onChange: () => {
+        clearErrors("password");
+        setFormAlert((current) => (current?.severity === "error" ? null : current));
+      },
+      validate: (value: string) => {
+        if (mode === "login") {
+          return value ? true : "Password is required.";
+        }
+
+        if (value.length < 8) {
+          return "Password must be at least 8 characters.";
+        }
+
+        if (!/[A-Z]/.test(value)) {
+          return "Password must include at least one uppercase letter.";
+        }
+
+        if (!/[a-z]/.test(value)) {
+          return "Password must include at least one lowercase letter.";
+        }
+
+        if (!/[0-9]/.test(value)) {
+          return "Password must include at least one number.";
+        }
+
+        return true;
+      },
+    }),
+  };
+
   const handleModeChange = (nextMode: AuthMode) => {
+    const currentValues = getValues();
+
     setMode(nextMode);
-    setFieldErrors({});
+    clearErrors();
     setFormAlert(null);
+    reset(currentValues);
   };
 
-  const handleFieldChange = (field: AuthField, value: string) => {
-    setFormValues((current) => ({ ...current, [field]: value }));
-    setFieldErrors((current) => {
-      if (!current[field]) {
-        return current;
-      }
+  const onSubmit = handleSubmit(
+    (values) => {
+      clearErrors();
+      setFormAlert(null);
 
-      const nextErrors = { ...current };
-      delete nextErrors[field];
-      return nextErrors;
-    });
-
-    setFormAlert((current) => (current?.severity === "error" ? null : current));
-  };
-
-  const handleSubmit = () => {
-    const nextFieldErrors = validateAuthForm(mode, formValues);
-
-    if (Object.keys(nextFieldErrors).length > 0) {
-      setFieldErrors(nextFieldErrors);
+      authMutation.mutate({
+        name: values.name.trim(),
+        email: values.email.trim(),
+        password: values.password,
+      });
+    },
+    () => {
       setFormAlert({
         severity: "error",
         message: "Please fix the highlighted fields and try again.",
       });
-      return;
-    }
-
-    setFieldErrors({});
-    setFormAlert(null);
-    authMutation.mutate();
-  };
+    },
+  );
 
   return (
     <Box
@@ -203,13 +210,13 @@ export const AuthPage = () => {
       <Container maxWidth="sm">
         <AuthFormCard
           mode={mode}
-          formValues={formValues}
           alert={formAlert}
-          fieldErrors={fieldErrors}
+          fieldErrors={errors}
           isPending={authMutation.isPending}
+          formFields={authRegister}
           onModeChange={handleModeChange}
-          onFieldChange={handleFieldChange}
-          onSubmit={handleSubmit}
+          onForgotPassword={() => navigate("/auth/forgot")}
+          onSubmit={onSubmit}
         />
       </Container>
     </Box>

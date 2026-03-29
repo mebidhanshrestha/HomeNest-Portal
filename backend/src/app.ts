@@ -1,5 +1,6 @@
 import cors from "cors";
 import express from "express";
+import path from "node:path";
 import { authRoutes } from "./routes/authRoutes.js";
 import { favouriteRoutes } from "./routes/favouriteRoutes.js";
 import { propertyRoutes } from "./routes/propertyRoutes.js";
@@ -10,11 +11,36 @@ export const app = express();
 
 app.use(
   cors({
-    origin: env.clientOrigin,
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      const allowedOrigins = new Set(
+        env.clientOrigins.flatMap((allowedOrigin) => {
+          const url = new URL(allowedOrigin);
+          const variants = [allowedOrigin];
+
+          if (url.hostname === "localhost") {
+            variants.push(`${url.protocol}//127.0.0.1:${url.port}`);
+          }
+
+          if (url.hostname === "127.0.0.1") {
+            variants.push(`${url.protocol}//localhost:${url.port}`);
+          }
+
+          return variants;
+        }),
+      );
+
+      callback(null, allowedOrigins.has(origin));
+    },
     credentials: true,
   }),
 );
 app.use(express.json());
+app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
 app.get("/api/health", (_request, response) => {
   response.json({ status: "ok" });

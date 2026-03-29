@@ -251,35 +251,6 @@ export const createAppTheme = (mode: ThemeMode) => {
           },
         },
       },
-      MuiSwitch: {
-        styleOverrides: {
-          root: {
-            width: 40,
-            height: 24,
-            padding: 0,
-          },
-          switchBase: {
-            padding: 2,
-            "&.Mui-checked": {
-              transform: "translateX(16px)",
-              "& + .MuiSwitch-track": {
-                backgroundColor: APP_BRAND_COLORS.primary,
-                opacity: 1,
-              },
-            },
-          },
-          thumb: {
-            width: 20,
-            height: 20,
-            boxShadow: "none",
-          },
-          track: {
-            borderRadius: 12,
-            backgroundColor: surfaces.border,
-            opacity: 1,
-          },
-        },
-      },
       MuiDivider: {
         styleOverrides: {
           root: {

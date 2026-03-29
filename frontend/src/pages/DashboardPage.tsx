@@ -137,8 +137,8 @@ export const DashboardPage = () => {
               description="Open the dedicated pages for browsing listings, reviewing saved homes, or managing your account."
             >
               <Stack direction={{ xs: "column", md: "row" }} spacing={1.5} useFlexGap flexWrap="wrap">
-                <AppButton onClick={() => navigate("/dashboard/listings")}>
-                  Browse listings
+                <AppButton onClick={() => navigate("/dashboard/properties")}>
+                  Browse properties
                 </AppButton>
                 <AppButton variant="outlined" onClick={() => navigate("/dashboard/saved")}>
                   View saved homes
@@ -207,10 +207,10 @@ export const DashboardPage = () => {
                 <AppButton
                   startIcon={favourites.length === 0 ? <HomeOutlinedIcon /> : <BookmarkBorderOutlinedIcon />}
                   onClick={() =>
-                    navigate(favourites.length === 0 ? "/dashboard/listings" : "/dashboard/saved")
+                    navigate(favourites.length === 0 ? "/dashboard/properties" : "/dashboard/saved")
                   }
                 >
-                  {favourites.length === 0 ? "Open listings" : "Open saved homes"}
+                  {favourites.length === 0 ? "Open properties" : "Open saved homes"}
                 </AppButton>
               </Stack>
             </SectionCard>

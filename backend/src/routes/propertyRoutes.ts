@@ -1,8 +1,24 @@
 import { Router } from "express";
-import { listProperties } from "../controllers/propertyController.js";
+import {
+  createProperty,
+  deleteProperty,
+  getProperty,
+  listProperties,
+  updateProperty,
+} from "../controllers/propertyController.js";
+import { propertyImageUpload } from "../middleware/upload.js";
 import { requireAuth } from "../middleware/auth.js";
 import { asyncHandler } from "../utils/http.js";
 
 export const propertyRoutes = Router();
 
 propertyRoutes.get("/", requireAuth, asyncHandler(listProperties));
+propertyRoutes.get("/:id", requireAuth, asyncHandler(getProperty));
+propertyRoutes.post(
+  "/",
+  requireAuth,
+  propertyImageUpload.single("image"),
+  asyncHandler(createProperty),
+);
+propertyRoutes.put("/:id", requireAuth, asyncHandler(updateProperty));
+propertyRoutes.delete("/:id", requireAuth, asyncHandler(deleteProperty));
