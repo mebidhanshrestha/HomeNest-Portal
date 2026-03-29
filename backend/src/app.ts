@@ -61,3 +61,5 @@ app.use("/api/favourites", favouriteRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
+
+export default app;
