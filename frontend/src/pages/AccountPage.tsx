@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Avatar, Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { Avatar, Stack, Typography } from "@mui/material";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { changePassword } from "../services/authService";
 import { AppButton } from "../components/ui/AppButton";
 import { AppBreadcrumbs } from "../components/ui/AppBreadcrumbs";
+import { AccountPageSkeleton } from "../components/ui/AppSkeletons";
 import { AppTextField } from "../components/ui/AppTextField";
 import { ErrorState } from "../components/ui/ErrorState";
 import { SectionCard } from "../components/ui/SectionCard";
@@ -75,11 +76,7 @@ export const AccountPage = () => {
   }, [showToast, userError]);
 
   if (userQuery.isLoading && !user) {
-    return (
-      <Box sx={{ minHeight: "60vh", display: "grid", placeItems: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <AccountPageSkeleton />;
   }
 
   if (blockingUserError) {

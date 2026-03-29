@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Box, CircularProgress, Grid2, Stack, Typography } from "@mui/material";
+import { Grid2, Stack, Typography } from "@mui/material";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
@@ -9,6 +9,7 @@ import { AppButton } from "../components/ui/AppButton";
 import { DashboardAnalytics } from "../components/dashboard/DashboardAnalytics";
 import { ErrorState } from "../components/ui/ErrorState";
 import { PageHeader } from "../components/ui/PageHeader";
+import { DashboardPageSkeleton } from "../components/ui/AppSkeletons";
 import { SectionCard } from "../components/ui/SectionCard";
 import { StatCard } from "../components/ui/StatCard";
 import { usePortalData } from "../hooks/usePortalData";
@@ -25,6 +26,9 @@ export const DashboardPage = () => {
     cities,
     averagePrice,
     userQuery,
+    propertiesQuery,
+    favouritesQuery,
+    propertyCitiesQuery,
     blockingUserError,
     userError,
   } = usePortalData();
@@ -36,11 +40,7 @@ export const DashboardPage = () => {
   }, [showToast, userError]);
 
   if (userQuery.isLoading && !user) {
-    return (
-      <Box sx={{ minHeight: "60vh", display: "grid", placeItems: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <DashboardPageSkeleton />;
   }
 
   if (blockingUserError) {
@@ -134,6 +134,14 @@ export const DashboardPage = () => {
           <DashboardAnalytics
             properties={properties}
             favouriteCount={favourites.length}
+            isLoading={
+              propertiesQuery.isLoading ||
+              favouritesQuery.isLoading ||
+              propertyCitiesQuery.isLoading ||
+              propertiesQuery.isFetching ||
+              favouritesQuery.isFetching ||
+              propertyCitiesQuery.isFetching
+            }
           />
         </Grid2>
       </Grid2>

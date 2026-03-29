@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { ApexOptions } from "apexcharts";
 import Chart from "react-apexcharts";
-import { Grid2, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, Grid2, Stack, Typography } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import { SectionCard } from "../ui/SectionCard";
 import type { Property } from "../../types";
@@ -9,11 +9,13 @@ import type { Property } from "../../types";
 type DashboardAnalyticsProps = {
   properties: Property[];
   favouriteCount: number;
+  isLoading?: boolean;
 };
 
 export const DashboardAnalytics = ({
   properties,
   favouriteCount,
+  isLoading = false,
 }: DashboardAnalyticsProps) => {
   const theme = useTheme();
 
@@ -156,24 +158,30 @@ export const DashboardAnalytics = ({
           description="Where the current catalogue is concentrated."
           sx={{ height: "100%" }}
         >
-          <Stack spacing={2}>
-            <Chart
-              type="bar"
-              height={280}
-              series={[
-                {
-                  name: "Listings",
-                  data: citySeries.map(([, count]) => count),
-                },
-              ]}
-              options={cityChartOptions}
-            />
-            <Typography variant="body2" color="text.secondary">
-              {citySeries.length > 0
-                ? `${citySeries[0][0]} currently has the highest listing count.`
-                : "Add more properties to see city-level distribution."}
-            </Typography>
-          </Stack>
+          {isLoading ? (
+            <Box sx={{ minHeight: 332, display: "grid", placeItems: "center" }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Stack spacing={2}>
+              <Chart
+                type="bar"
+                height={280}
+                series={[
+                  {
+                    name: "Listings",
+                    data: citySeries.map(([, count]) => count),
+                  },
+                ]}
+                options={cityChartOptions}
+              />
+              <Typography variant="body2" color="text.secondary">
+                {citySeries.length > 0
+                  ? `${citySeries[0][0]} currently has the highest listing count.`
+                  : "Add more properties to see city-level distribution."}
+              </Typography>
+            </Stack>
+          )}
         </SectionCard>
       </Grid2>
 
@@ -183,48 +191,54 @@ export const DashboardAnalytics = ({
           description="Pricing spread across the current catalogue."
           sx={{ height: "100%" }}
         >
-          <Stack spacing={2.5}>
-            <Chart
-              type="area"
-              height={280}
-              series={[
-                {
-                  name: "Price",
-                  data: priceSeries.map((item) => item.y),
-                },
-              ]}
-              options={priceChartOptions}
-            />
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={1.5}
-              useFlexGap
-              flexWrap="wrap"
-            >
-              <Typography variant="body2" color="text.secondary">
-                Lowest:{" "}
-                <Typography component="span" color="text.primary" fontWeight={600}>
-                  {priceSeries.length > 0
-                    ? `NPR ${priceSeries[0].y.toLocaleString("en-US")}`
-                    : "NPR 0"}
+          {isLoading ? (
+            <Box sx={{ minHeight: 332, display: "grid", placeItems: "center" }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Stack spacing={2.5}>
+              <Chart
+                type="area"
+                height={280}
+                series={[
+                  {
+                    name: "Price",
+                    data: priceSeries.map((item) => item.y),
+                  },
+                ]}
+                options={priceChartOptions}
+              />
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1.5}
+                useFlexGap
+                flexWrap="wrap"
+              >
+                <Typography variant="body2" color="text.secondary">
+                  Lowest:{" "}
+                  <Typography component="span" color="text.primary" fontWeight={600}>
+                    {priceSeries.length > 0
+                      ? `NPR ${priceSeries[0].y.toLocaleString("en-US")}`
+                      : "NPR 0"}
+                  </Typography>
                 </Typography>
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Highest:{" "}
-                <Typography component="span" color="text.primary" fontWeight={600}>
-                  {priceSeries.length > 0
-                    ? `NPR ${priceSeries[priceSeries.length - 1].y.toLocaleString("en-US")}`
-                    : "NPR 0"}
+                <Typography variant="body2" color="text.secondary">
+                  Highest:{" "}
+                  <Typography component="span" color="text.primary" fontWeight={600}>
+                    {priceSeries.length > 0
+                      ? `NPR ${priceSeries[priceSeries.length - 1].y.toLocaleString("en-US")}`
+                      : "NPR 0"}
+                  </Typography>
                 </Typography>
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Saved ratio:{" "}
-                <Typography component="span" color="text.primary" fontWeight={600}>
-                  {savedRatio}%
+                <Typography variant="body2" color="text.secondary">
+                  Saved ratio:{" "}
+                  <Typography component="span" color="text.primary" fontWeight={600}>
+                    {savedRatio}%
+                  </Typography>
                 </Typography>
-              </Typography>
+              </Stack>
             </Stack>
-          </Stack>
+          )}
         </SectionCard>
       </Grid2>
     </Grid2>

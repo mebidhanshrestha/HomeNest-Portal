@@ -1,8 +1,9 @@
-import { Box, CircularProgress, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppButton } from "../../components/ui/AppButton";
 import { AppBreadcrumbs } from "../../components/ui/AppBreadcrumbs";
+import { PropertyEditFormSkeleton, PropertyEditSkeleton } from "../../components/ui/AppSkeletons";
 import { ErrorState } from "../../components/ui/ErrorState";
 import { SectionCard } from "../../components/ui/SectionCard";
 import { normalizeAppError } from "../../lib/api";
@@ -62,9 +63,7 @@ export const PropertyEditPage = () => {
       />
       <SectionCard title="Property details" description="Adjust the listing information and save your changes.">
         {propertyQuery.isLoading ? (
-          <Box sx={{ minHeight: 280, display: "grid", placeItems: "center" }}>
-            <CircularProgress />
-          </Box>
+          <PropertyEditFormSkeleton />
         ) : propertyError || !propertyQuery.data ? (
           <ErrorState
             title={propertyError?.title ?? "Not found"}

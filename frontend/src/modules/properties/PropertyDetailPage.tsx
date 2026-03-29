@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   Box,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -22,6 +21,7 @@ import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppButton } from "../../components/ui/AppButton";
 import { AppBreadcrumbs } from "../../components/ui/AppBreadcrumbs";
+import { PropertyDetailSkeleton } from "../../components/ui/AppSkeletons";
 import { ErrorState } from "../../components/ui/ErrorState";
 import { SectionCard } from "../../components/ui/SectionCard";
 import { normalizeAppError } from "../../lib/api";
@@ -120,9 +120,7 @@ export const PropertyDetailPage = () => {
         }
       />
       {propertyQuery.isLoading ? (
-        <Box sx={{ minHeight: "60vh", display: "grid", placeItems: "center" }}>
-          <CircularProgress />
-        </Box>
+        <PropertyDetailSkeleton />
       ) : propertyError || !property ? (
         <SectionCard>
           <ErrorState

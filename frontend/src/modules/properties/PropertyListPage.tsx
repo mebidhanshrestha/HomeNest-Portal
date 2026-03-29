@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Box, CircularProgress, Grid2, Stack, TablePagination } from "@mui/material";
+import { Grid2, Stack, TablePagination } from "@mui/material";
 import AddHomeOutlinedIcon from "@mui/icons-material/AddHomeOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
@@ -8,6 +8,7 @@ import { PropertyCard } from "../../components/PropertyCard";
 import { PropertyFilters } from "../../components/dashboard/PropertyFilters";
 import { AppButton } from "../../components/ui/AppButton";
 import { AppBreadcrumbs } from "../../components/ui/AppBreadcrumbs";
+import { PropertyFiltersSkeleton, PropertyGridSkeleton, PropertyListSkeleton } from "../../components/ui/AppSkeletons";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { ErrorState } from "../../components/ui/ErrorState";
 import { SectionCard } from "../../components/ui/SectionCard";
@@ -61,11 +62,7 @@ export const PropertyListPage = () => {
   }, [searchTerm, selectedCity, showSavedOnly, rowsPerPage]);
 
   if (userQuery.isLoading && !user) {
-    return (
-      <Box sx={{ minHeight: "60vh", display: "grid", placeItems: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <PropertyListSkeleton />;
   }
 
   if (blockingUserError) {
@@ -108,7 +105,9 @@ export const PropertyListPage = () => {
           </AppButton>
         }
       />
-      {!propertiesError ? (
+      {propertiesQuery.isLoading ? (
+        <PropertyFiltersSkeleton />
+      ) : !propertiesError ? (
         <PropertyFilters
           searchTerm={searchTerm}
           selectedCity={selectedCity}
@@ -142,9 +141,7 @@ export const PropertyListPage = () => {
         }
       >
         {propertiesQuery.isLoading ? (
-          <Box sx={{ minHeight: 280, display: "grid", placeItems: "center" }}>
-            <CircularProgress />
-          </Box>
+          <PropertyGridSkeleton />
         ) : propertiesError ? (
           <ErrorState
             title={propertiesError.title}

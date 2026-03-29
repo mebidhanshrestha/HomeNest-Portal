@@ -1,11 +1,12 @@
 import { useEffect } from "react";
-import { Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import { useNavigate } from "react-router-dom";
 import { SavedPropertiesPanel } from "../components/dashboard/SavedPropertiesPanel";
 import { AppButton } from "../components/ui/AppButton";
 import { AppBreadcrumbs } from "../components/ui/AppBreadcrumbs";
+import { SavedHomesContentSkeleton, SavedHomesPageSkeleton } from "../components/ui/AppSkeletons";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
 import { SectionCard } from "../components/ui/SectionCard";
@@ -40,11 +41,7 @@ export const SavedHomesPage = () => {
   }, [showToast, userError]);
 
   if (userQuery.isLoading && !user) {
-    return (
-      <Box sx={{ minHeight: "60vh", display: "grid", placeItems: "center" }}>
-        <CircularProgress />
-      </Box>
-    );
+    return <SavedHomesPageSkeleton />;
   }
 
   if (blockingUserError) {
@@ -92,9 +89,7 @@ export const SavedHomesPage = () => {
         }
       >
         {favouritesQuery.isLoading ? (
-          <Box sx={{ minHeight: 260, display: "grid", placeItems: "center" }}>
-            <CircularProgress />
-          </Box>
+          <SavedHomesContentSkeleton />
         ) : favouritesError ? (
           <ErrorState
             title={favouritesError.title}
