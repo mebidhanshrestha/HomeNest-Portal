@@ -4,6 +4,7 @@ import type { Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../db/prisma.js";
 import { AppError } from "../utils/http.js";
+import { uploadsDirectory } from "../utils/uploads.js";
 import {
   createPropertySchema,
   propertyListQuerySchema,
@@ -238,7 +239,7 @@ export const deleteProperty = async (request: Request, response: Response) => {
   const uploadsPrefix = `${request.protocol}://${request.get("host")}/uploads/`;
   if (existingProperty.imageUrl.startsWith(uploadsPrefix)) {
     const filename = existingProperty.imageUrl.slice(uploadsPrefix.length);
-    const filePath = path.resolve(process.cwd(), "uploads", filename);
+    const filePath = path.join(uploadsDirectory, filename);
 
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
