@@ -68,7 +68,10 @@ export const listProperties = async (request: Request, response: Response) => {
   const [properties, totalItems] = await Promise.all([
     prisma.property.findMany({
       where,
-      orderBy: { id: "asc" },
+      orderBy: [
+        { createdAt: "desc" },
+        { id: "desc" },
+      ],
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {
