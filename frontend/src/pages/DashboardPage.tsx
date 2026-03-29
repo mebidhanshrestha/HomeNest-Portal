@@ -78,9 +78,9 @@ export const DashboardPage = () => {
   return (
     <Stack spacing={4}>
       <PageHeader
-        eyebrow="Overview"
+        eyebrow="Dashboard"
         title={`Welcome, ${user?.name ?? "Buyer"}`}
-        subtitle="Use the sidebar to move between sections. This overview gives you the current status of the catalogue, your shortlist, and the next actions you can take."
+        subtitle=""
         actions={
           <Typography variant="body2" color="text.secondary">
             Role: {user?.role ?? "buyer"}

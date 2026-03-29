@@ -1,4 +1,15 @@
-import { Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { useState } from "react";
+import {
+  Box,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
 import BookmarkOutlinedIcon from "@mui/icons-material/BookmarkOutlined";
@@ -8,8 +19,8 @@ import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppButton } from "../../components/ui/AppButton";
+import { AppBreadcrumbs } from "../../components/ui/AppBreadcrumbs";
 import { ErrorState } from "../../components/ui/ErrorState";
-import { PageHeader } from "../../components/ui/PageHeader";
 import { SectionCard } from "../../components/ui/SectionCard";
 import { normalizeAppError } from "../../lib/api";
 import { addFavourite, removeFavourite } from "../../services/favouriteService";
@@ -17,6 +28,7 @@ import { deleteProperty, getProperty } from "../../services/propertyService";
 import { useToastStore } from "../../stores/toastStore";
 
 export const PropertyDetailPage = () => {
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const showToast = useToastStore((state) => state.showToast);
@@ -80,12 +92,14 @@ export const PropertyDetailPage = () => {
 
   return (
     <Stack spacing={4}>
-      <PageHeader
-        eyebrow="Properties"
-        title={property?.title ?? "Property detail"}
-        subtitle="Review listing information, update the property, or remove it from the catalogue."
+      <AppBreadcrumbs
+        items={[
+          { label: "Dashboard", to: "/dashboard" },
+          { label: "Properties", to: "/dashboard/properties" },
+          { label: property?.title ?? "Property detail" },
+        ]}
         actions={
-          <Stack spacing={1.5}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
             <AppButton variant="outlined" onClick={() => navigate("/dashboard/properties")}>
               Back to list
             </AppButton>
@@ -133,7 +147,7 @@ export const PropertyDetailPage = () => {
           </SectionCard>
 
           <SectionCard
-            title="Overview"
+            title="Dashboard"
             description="Core information for this property listing."
             action={
               <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
@@ -150,7 +164,7 @@ export const PropertyDetailPage = () => {
                   color="secondary"
                   startIcon={<DeleteOutlineOutlinedIcon />}
                   disabled={deleteMutation.isPending}
-                  onClick={() => deleteMutation.mutate()}
+                  onClick={() => setConfirmDeleteOpen(true)}
                 >
                   {deleteMutation.isPending ? "Deleting..." : "Delete property"}
                 </AppButton>
@@ -166,7 +180,7 @@ export const PropertyDetailPage = () => {
                 <Typography color="text.secondary">{property.city}</Typography>
               </Stack>
               <Typography variant="h5" color="primary.main" fontWeight={700}>
-                ${property.price.toLocaleString("en-US")}
+                NPR {property.price.toLocaleString("en-US")}
               </Typography>
               <Typography color="text.secondary">
                 Created {new Date(property.createdAt).toLocaleDateString("en-US", {
@@ -179,6 +193,46 @@ export const PropertyDetailPage = () => {
           </SectionCard>
         </Stack>
       )}
+      <Dialog
+        open={confirmDeleteOpen}
+        onClose={() => {
+          if (!deleteMutation.isPending) {
+            setConfirmDeleteOpen(false);
+          }
+        }}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Delete property?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {property
+              ? `This will permanently remove "${property.title}" from the catalogue. This action cannot be undone.`
+              : "This will permanently remove this property from the catalogue. This action cannot be undone."}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5 }}>
+          <AppButton
+            variant="outlined"
+            onClick={() => setConfirmDeleteOpen(false)}
+            disabled={deleteMutation.isPending}
+          >
+            Cancel
+          </AppButton>
+          <AppButton
+            variant="contained"
+            color="error"
+            startIcon={<DeleteOutlineOutlinedIcon />}
+            disabled={deleteMutation.isPending}
+            onClick={() => {
+              deleteMutation.mutate();
+              setConfirmDeleteOpen(false);
+            }}
+          >
+            {deleteMutation.isPending ? "Deleting..." : "Delete property"}
+          </AppButton>
+        </DialogActions>
+      </Dialog>
     </Stack>
   );
 };

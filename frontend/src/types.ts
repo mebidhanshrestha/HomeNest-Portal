@@ -15,6 +15,13 @@ export type Property = {
   isFavourite?: boolean;
 };
 
+export type PropertyPagination = {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+};
+
 export type AuthResponse = {
   token: string;
   user: User;

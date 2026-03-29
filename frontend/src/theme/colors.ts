@@ -2,8 +2,8 @@ import type { ThemeMode } from "../stores/themeStore";
 
 // Update these two values to reskin the app.
 export const APP_BRAND_COLORS = {
-  primary: "#943AD0",
-  secondary: "#F0B94B",
+  primary: "#f25f2e",
+  secondary: "#152f69",
 };
 
 const lightSurfaces = {

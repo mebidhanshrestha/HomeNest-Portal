@@ -113,16 +113,9 @@ export const PropertyCard = ({
               Price
             </Typography>
             <Typography variant="h6" fontWeight={600}>
-              ${property.price.toLocaleString("en-US")}
+              NPR {property.price.toLocaleString("en-US")}
             </Typography>
           </Stack>
-          <Typography
-            variant="caption"
-            fontWeight={500}
-            color={property.isFavourite ? "primary.main" : "text.secondary"}
-          >
-            {property.isFavourite ? "Shortlisted" : "Available"}
-          </Typography>
         </Stack>
 
         <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25} sx={{ mt: "auto" }}>

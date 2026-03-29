@@ -3,6 +3,7 @@ import {
   createProperty,
   deleteProperty,
   getProperty,
+  listPropertyCities,
   listProperties,
   updateProperty,
 } from "../controllers/propertyController.js";
@@ -12,6 +13,7 @@ import { asyncHandler } from "../utils/http.js";
 
 export const propertyRoutes = Router();
 
+propertyRoutes.get("/cities", requireAuth, asyncHandler(listPropertyCities));
 propertyRoutes.get("/", requireAuth, asyncHandler(listProperties));
 propertyRoutes.get("/:id", requireAuth, asyncHandler(getProperty));
 propertyRoutes.post(

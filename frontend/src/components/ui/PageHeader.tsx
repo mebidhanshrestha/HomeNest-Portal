@@ -54,15 +54,14 @@ export const PageHeader = ({
     </Stack>
     {actions ? (
       <Box
-        sx={(theme) => ({
-          px: 2,
-          py: 1.5,
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: { xs: "flex-start", lg: "flex-end" },
+          flexWrap: "wrap",
+          gap: 1.5,
           minWidth: { lg: 180 },
-          borderRadius: 3,
-          border: "1px solid",
-          borderColor: alpha(theme.palette.primary.main, 0.12),
-          backgroundColor: alpha(theme.palette.primary.main, 0.06),
-        })}
+        }}
       >
         {actions}
       </Box>

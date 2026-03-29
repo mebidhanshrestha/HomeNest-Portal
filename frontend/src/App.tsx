@@ -61,7 +61,6 @@ function App() {
                 }
               >
                 <Route index element={<DashboardPage />} />
-                <Route path="overview" element={<DashboardPage />} />
                 <Route path="properties" element={<PropertyListPage />} />
                 <Route path="properties/new" element={<PropertyCreatePage />} />
                 <Route path="properties/:id" element={<PropertyDetailPage />} />

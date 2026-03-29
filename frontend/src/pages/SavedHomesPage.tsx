@@ -5,9 +5,9 @@ import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import { useNavigate } from "react-router-dom";
 import { SavedPropertiesPanel } from "../components/dashboard/SavedPropertiesPanel";
 import { AppButton } from "../components/ui/AppButton";
+import { AppBreadcrumbs } from "../components/ui/AppBreadcrumbs";
 import { EmptyState } from "../components/ui/EmptyState";
 import { ErrorState } from "../components/ui/ErrorState";
-import { PageHeader } from "../components/ui/PageHeader";
 import { SectionCard } from "../components/ui/SectionCard";
 import { usePortalData } from "../hooks/usePortalData";
 import { useAuthStore } from "../stores/authStore";
@@ -27,7 +27,11 @@ export const SavedHomesPage = () => {
     userError,
     favouritesError,
     toggleFavourite,
-  } = usePortalData();
+  } = usePortalData({
+    includeProperties: false,
+    includeFavourites: true,
+    includeCities: false,
+  });
 
   useEffect(() => {
     if (userError) {
@@ -66,15 +70,11 @@ export const SavedHomesPage = () => {
 
   return (
     <Stack spacing={4}>
-      <PageHeader
-        eyebrow="Saved Homes"
-        title="Your shortlist"
-        subtitle="Review saved homes in one place and remove anything that is no longer relevant."
-        actions={
-          <Typography variant="body2" color="text.secondary">
-            {favourites.length} saved {favourites.length === 1 ? "property" : "properties"}
-          </Typography>
-        }
+      <AppBreadcrumbs
+        items={[
+          { label: "Dashboard", to: "/dashboard" },
+          { label: "Saved homes" },
+        ]}
       />
       <SectionCard
         title="Saved homes"
@@ -129,7 +129,7 @@ export const SavedHomesPage = () => {
                     Browse properties
                   </AppButton>
                   <AppButton variant="outlined" onClick={() => navigate("/dashboard")}>
-                    Back to overview
+                    Back to dashboard
                   </AppButton>
                 </Stack>
               }

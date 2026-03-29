@@ -1,18 +1,16 @@
 import { useEffect } from "react";
 import {
+  Autocomplete,
   FormControlLabel,
   IconButton,
   InputAdornment,
   Stack,
   Switch,
   Tooltip,
-  Typography,
 } from "@mui/material";
-import { alpha } from "@mui/material/styles";
 import { Controller, useForm } from "react-hook-form";
 import ClearOutlinedIcon from "@mui/icons-material/ClearOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
-import { AppButton } from "../ui/AppButton";
 import { AppTextField } from "../ui/AppTextField";
 import { SectionCard } from "../ui/SectionCard";
 
@@ -55,6 +53,7 @@ export const PropertyFilters = ({
   const watchedSearchTerm = watch("searchTerm");
   const watchedSelectedCity = watch("selectedCity");
   const watchedShowSavedOnly = watch("showSavedOnly");
+  const cityOptions = ["all", ...cities];
   const hasActiveFilters =
     Boolean(watchedSearchTerm) || watchedSelectedCity !== "all" || watchedShowSavedOnly;
 
@@ -93,28 +92,34 @@ export const PropertyFilters = ({
           alignItems={{ xl: "center" }}
           justifyContent="space-between"
         >
-          <AppTextField
-            label="Search homes"
-            placeholder="Search by city or title"
-            size="small"
-            sx={{ maxWidth: { xl: 420 } }}
-            {...register("searchTerm")}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchOutlinedIcon sx={{ color: "text.secondary" }} />
-                </InputAdornment>
-              ),
-            }}
-          />
-
           <Stack
             direction={{ xs: "column", sm: "row" }}
             spacing={1.5}
             alignItems={{ sm: "center" }}
-            justifyContent={{ sm: "space-between" }}
-            sx={{ width: { xs: "100%", xl: "auto" } }}
+            sx={{ width: { xs: "100%", xl: "auto" }, flexWrap: "wrap" }}
           >
+            <Controller
+              name="selectedCity"
+              control={control}
+              render={({ field }) => (
+                <Autocomplete
+                  options={cityOptions}
+                  value={field.value}
+                  onChange={(_event, value) => field.onChange(value ?? "all")}
+                  size="small"
+                  disableClearable
+                  sx={{ minWidth: { xs: "100%", sm: 240 } }}
+                  getOptionLabel={(option) => (option === "all" ? "All cities" : option)}
+                  renderInput={(params) => (
+                    <AppTextField
+                      {...params}
+                      label="City"
+                      placeholder="Select city"
+                    />
+                  )}
+                />
+              )}
+            />
             <FormControlLabel
               sx={{
                 m: 0,
@@ -138,57 +143,51 @@ export const PropertyFilters = ({
               }
               label="Saved only"
             />
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={(theme) => ({
-                  px: 1.5,
-                  py: 0.75,
-                  borderRadius: 999,
-                  backgroundColor: alpha(theme.palette.primary.main, 0.06),
-                })}
-              >
-                Showing {resultCount} {resultCount === 1 ? "property" : "properties"}
-              </Typography>
-              {hasActiveFilters ? (
-                <Tooltip title="Clear filters">
-                  <IconButton
-                    onClick={() => {
-                      reset({
-                        searchTerm: "",
-                        selectedCity: "all",
-                        showSavedOnly: false,
-                      });
-                      onClearFilters();
-                    }}
-                  >
-                    <ClearOutlinedIcon />
-                  </IconButton>
-                </Tooltip>
-              ) : null}
-            </Stack>
+            {hasActiveFilters ? (
+              <Tooltip title="Clear filters">
+                <IconButton
+                  onClick={() => {
+                    reset({
+                      searchTerm: "",
+                      selectedCity: "all",
+                      showSavedOnly: false,
+                    });
+                    onClearFilters();
+                  }}
+                >
+                  <ClearOutlinedIcon />
+                </IconButton>
+              </Tooltip>
+            ) : null}
           </Stack>
-        </Stack>
 
-        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-          <AppButton
-            type="button"
-            variant={watchedSelectedCity === "all" ? "contained" : "outlined"}
-            onClick={() => setValue("selectedCity", "all")}
-          >
-            All cities
-          </AppButton>
-          {cities.map((city) => (
-            <AppButton
-              key={city}
-              type="button"
-              variant={watchedSelectedCity === city ? "contained" : "outlined"}
-              onClick={() => setValue("selectedCity", city)}
-            >
-              {city}
-            </AppButton>
-          ))}
+          <AppTextField
+            label="Title/ City"
+            placeholder="Search..."
+            size="small"
+            sx={{
+              width: { xs: "100%", xl: 230 },
+              ml: { xl: "auto" },
+              "& .MuiInputLabel-root": {
+                fontSize: "0.8rem",
+              },
+              "& .MuiOutlinedInput-root": {
+                minHeight: 38,
+                backgroundColor: "background.paper",
+              },
+              "& .MuiOutlinedInput-input": {
+                py: 1,
+              },
+            }}
+            {...register("searchTerm")}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchOutlinedIcon sx={{ color: "text.secondary" }} />
+                </InputAdornment>
+              ),
+            }}
+          />
         </Stack>
       </Stack>
     </SectionCard>

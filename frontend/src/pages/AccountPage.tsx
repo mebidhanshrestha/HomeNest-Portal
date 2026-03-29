@@ -4,16 +4,19 @@ import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { changePassword } from "../services/authService";
 import { AppButton } from "../components/ui/AppButton";
+import { AppBreadcrumbs } from "../components/ui/AppBreadcrumbs";
 import { AppTextField } from "../components/ui/AppTextField";
 import { ErrorState } from "../components/ui/ErrorState";
-import { PageHeader } from "../components/ui/PageHeader";
 import { SectionCard } from "../components/ui/SectionCard";
 import { normalizeAppError } from "../lib/api";
 import { usePortalData } from "../hooks/usePortalData";
+import { getAvatarColors } from "../lib/avatarColor";
 import { useAuthStore } from "../stores/authStore";
 import { useToastStore } from "../stores/toastStore";
 
@@ -24,6 +27,7 @@ type ChangePasswordFormValues = {
 };
 
 export const AccountPage = () => {
+  const navigate = useNavigate();
   const clearSession = useAuthStore((state) => state.clearSession);
   const showToast = useToastStore((state) => state.showToast);
   const {
@@ -31,7 +35,11 @@ export const AccountPage = () => {
     userQuery,
     blockingUserError,
     userError,
-  } = usePortalData();
+  } = usePortalData({
+    includeProperties: false,
+    includeFavourites: false,
+    includeCities: false,
+  });
   const {
     register,
     handleSubmit,
@@ -46,6 +54,7 @@ export const AccountPage = () => {
     mode: "onSubmit",
     reValidateMode: "onChange",
   });
+  const avatarColors = getAvatarColors(user?.email ?? user?.name);
 
   const changePasswordMutation = useMutation({
     mutationFn: changePassword,
@@ -96,10 +105,24 @@ export const AccountPage = () => {
 
   return (
     <Stack spacing={4}>
-      <PageHeader
-        eyebrow="Account"
-        title="Account"
-        subtitle="Review your account details and update your password."
+      <AppBreadcrumbs
+        items={[
+          { label: "Dashboard", to: "/dashboard" },
+          { label: "Account" },
+        ]}
+        actions={
+          <AppButton
+            variant="contained"
+            color="error"
+            startIcon={<LogoutOutlinedIcon />}
+            onClick={() => {
+              clearSession();
+              navigate("/auth", { replace: true });
+            }}
+          >
+            Sign out
+          </AppButton>
+        }
       />
       <SectionCard title="Account details" description="Your current account information.">
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2.5} alignItems={{ sm: "center" }}>
@@ -107,8 +130,8 @@ export const AccountPage = () => {
             sx={{
               width: 84,
               height: 84,
-              bgcolor: "secondary.main",
-              color: "secondary.contrastText",
+              bgcolor: avatarColors.bg,
+              color: avatarColors.fg,
               fontSize: 32,
             }}
           >

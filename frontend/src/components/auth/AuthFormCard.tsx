@@ -8,17 +8,12 @@ import {
   Typography,
   useTheme,
   alpha,
-  Divider,
 } from "@mui/material";
 import type { FieldErrors, UseFormRegisterReturn } from "react-hook-form";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
-import MailOutlineOutlinedIcon from "@mui/icons-material/MailOutlineOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PersonAddAltOutlinedIcon from "@mui/icons-material/PersonAddAltOutlined";
-import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-
 import homeNestLogo from "../../assets/images/home-nest.png";
 import { AppButton } from "../ui/AppButton";
 import { AppTextField } from "../ui/AppTextField";
@@ -62,12 +57,10 @@ export const AuthFormCard = ({
       <Paper
         elevation={isDark ? 0 : 4}
         sx={{
-          borderRadius: 4, // More rounded for modern feel
+          borderRadius: 4,
           overflow: "hidden",
           border: "1px solid",
-          borderColor: isDark
-            ? alpha(theme.palette.divider, 0.1)
-            : "transparent",
+          borderColor: isDark ? alpha(theme.palette.divider, 0.1) : "transparent",
           background: isDark
             ? `linear-gradient(180deg, ${alpha(theme.palette.background.paper, 0.8)} 0%, ${alpha(
                 theme.palette.background.default,
@@ -80,7 +73,6 @@ export const AuthFormCard = ({
             : "0 10px 40px -10px rgba(0,0,0,0.1)",
         }}
       >
-        {/* Header Section */}
         <Stack spacing={4} sx={{ p: { xs: 4, sm: 6 } }}>
           <Stack spacing={3} alignItems="center">
             <Box
@@ -121,65 +113,39 @@ export const AuthFormCard = ({
             </Box>
           </Stack>
 
-          {/* Form Section */}
           <Stack component="form" spacing={2.5} onSubmit={onSubmit}>
-            {mode === "register" && (
+            {mode === "register" ? (
               <AppTextField
                 label="Full name"
-                placeholder="John Doe"
                 error={Boolean(fieldErrors.name)}
                 helperText={fieldErrors.name?.message}
                 required
                 {...formFields.name}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <PersonOutlineOutlinedIcon
-                        fontSize="small"
-                        color="action"
-                      />
-                    </InputAdornment>
-                  ),
-                }}
               />
-            )}
+            ) : null}
 
             <AppTextField
-              label="Email address"
+              label="Email"
               type="email"
-              placeholder="name@example.com"
               error={Boolean(fieldErrors.email)}
               helperText={fieldErrors.email?.message}
               required
               {...formFields.email}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <MailOutlineOutlinedIcon fontSize="small" color="action" />
-                  </InputAdornment>
-                ),
-              }}
             />
 
             <Box>
               <AppTextField
                 label="Password"
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
                 error={Boolean(fieldErrors.password)}
                 helperText={fieldErrors.password?.message}
                 required
                 {...formFields.password}
                 InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LockOutlinedIcon fontSize="small" color="action" />
-                    </InputAdornment>
-                  ),
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
-                        onClick={() => setShowPassword(!showPassword)}
+                        onClick={() => setShowPassword((current) => !current)}
                         edge="end"
                         size="small"
                       >
@@ -193,7 +159,7 @@ export const AuthFormCard = ({
                   ),
                 }}
               />
-              {mode === "login" && (
+              {mode === "login" ? (
                 <Box sx={{ mt: 1, textAlign: "right" }}>
                   <Typography
                     variant="caption"
@@ -208,7 +174,7 @@ export const AuthFormCard = ({
                     Forgot password?
                   </Typography>
                 </Box>
-              )}
+              ) : null}
             </Box>
 
             <AppButton
@@ -216,13 +182,7 @@ export const AuthFormCard = ({
               fullWidth
               size="large"
               variant="contained"
-              startIcon={
-                mode === "login" ? (
-                  <LoginOutlinedIcon />
-                ) : (
-                  <PersonAddAltOutlinedIcon />
-                )
-              }
+              startIcon={mode === "login" ? <LoginOutlinedIcon /> : <PersonAddAltOutlinedIcon />}
               disabled={isPending}
               sx={{
                 py: 1.5,
@@ -242,7 +202,6 @@ export const AuthFormCard = ({
           </Stack>
         </Stack>
 
-        {/* Footer Section */}
         <Box
           sx={{
             p: 3,

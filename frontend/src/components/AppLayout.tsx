@@ -33,6 +33,7 @@ import { useAuthStore } from "../stores/authStore";
 import { useThemeStore } from "../stores/themeStore";
 import homeNestLogo from "../assets/images/home-nest.png";
 import homeNestIcon from "../assets/images/home-nest icon.png";
+import { getAvatarColors } from "../lib/avatarColor";
 
 const DRAWER_WIDTH = 260;
 const COLLAPSED_DRAWER_WIDTH = 72;
@@ -40,10 +41,10 @@ const NAV_ITEM_HEIGHT = 48;
 
 const navigationItems = [
   {
-    label: "Overview",
+    label: "Dashboard",
     path: "/dashboard",
     icon: <GridViewOutlinedIcon />,
-    matches: (pathname: string) => pathname === "/dashboard" || pathname === "/dashboard/overview",
+    matches: (pathname: string) => pathname === "/dashboard",
   },
   {
     label: "Properties",
@@ -95,6 +96,10 @@ export const AppLayout = () => {
   const userInitial = useMemo(
     () => user?.name?.trim().charAt(0).toUpperCase() ?? "U",
     [user?.name],
+  );
+  const avatarColors = useMemo(
+    () => getAvatarColors(user?.email ?? user?.name),
+    [user?.email, user?.name],
   );
 
   const handleDrawerToggle = () => {
@@ -349,8 +354,8 @@ export const AppLayout = () => {
               sx={{
                 width: 36,
                 height: 36,
-                bgcolor: "primary.main",
-                color: "primary.contrastText",
+                bgcolor: avatarColors.bg,
+                color: avatarColors.fg,
                 fontSize: "0.875rem",
               }}
             >

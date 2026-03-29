@@ -72,3 +72,20 @@ export const propertySchema = z.object({
 export const propertyParamsSchema = z.object({
   id: z.coerce.number().int().positive("Select a valid property."),
 });
+
+export const propertyListQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  pageSize: z.coerce.number().int().min(1).max(1000).default(9),
+  search: z.string().trim().optional().default(""),
+  city: z.string().trim().optional().default(""),
+  savedOnly: z.preprocess(
+    (value) => {
+      if (typeof value === "string") {
+        return value === "true";
+      }
+
+      return value;
+    },
+    z.boolean().optional().default(false),
+  ),
+});

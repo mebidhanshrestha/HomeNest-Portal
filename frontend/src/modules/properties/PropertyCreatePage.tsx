@@ -2,7 +2,7 @@ import { Stack } from "@mui/material";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { AppButton } from "../../components/ui/AppButton";
-import { PageHeader } from "../../components/ui/PageHeader";
+import { AppBreadcrumbs } from "../../components/ui/AppBreadcrumbs";
 import { SectionCard } from "../../components/ui/SectionCard";
 import { normalizeAppError } from "../../lib/api";
 import { createProperty, type CreatePropertyPayload } from "../../services/propertyService";
@@ -28,10 +28,12 @@ export const PropertyCreatePage = () => {
 
   return (
     <Stack spacing={4}>
-      <PageHeader
-        eyebrow="Properties"
-        title="Create property"
-        subtitle="Add a new property to the catalogue with its core listing information."
+      <AppBreadcrumbs
+        items={[
+          { label: "Dashboard", to: "/dashboard" },
+          { label: "Properties", to: "/dashboard/properties" },
+          { label: "Create" },
+        ]}
         actions={
           <AppButton variant="outlined" onClick={() => navigate("/dashboard/properties")}>
             Back to list

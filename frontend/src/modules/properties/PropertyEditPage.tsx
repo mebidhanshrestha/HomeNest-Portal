@@ -2,8 +2,8 @@ import { Box, CircularProgress, Stack } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppButton } from "../../components/ui/AppButton";
+import { AppBreadcrumbs } from "../../components/ui/AppBreadcrumbs";
 import { ErrorState } from "../../components/ui/ErrorState";
-import { PageHeader } from "../../components/ui/PageHeader";
 import { SectionCard } from "../../components/ui/SectionCard";
 import { normalizeAppError } from "../../lib/api";
 import { getProperty, updateProperty, type PropertyPayload } from "../../services/propertyService";
@@ -42,10 +42,16 @@ export const PropertyEditPage = () => {
 
   return (
     <Stack spacing={4}>
-      <PageHeader
-        eyebrow="Properties"
-        title="Edit property"
-        subtitle="Update the listing details for this property."
+      <AppBreadcrumbs
+        items={[
+          { label: "Dashboard", to: "/dashboard" },
+          { label: "Properties", to: "/dashboard/properties" },
+          {
+            label: propertyQuery.data?.title ?? "Property detail",
+            to: Number.isFinite(propertyId) ? `/dashboard/properties/${propertyId}` : undefined,
+          },
+          { label: "Edit" },
+        ]}
         actions={
           <AppButton variant="outlined" onClick={() => navigate(`/dashboard/properties/${propertyId}`)}>
             Back to detail

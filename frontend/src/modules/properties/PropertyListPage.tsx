@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Box, CircularProgress, Grid2, Stack, Typography } from "@mui/material";
+import { Box, CircularProgress, Grid2, Stack, TablePagination } from "@mui/material";
 import AddHomeOutlinedIcon from "@mui/icons-material/AddHomeOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
@@ -7,9 +7,9 @@ import { useNavigate } from "react-router-dom";
 import { PropertyCard } from "../../components/PropertyCard";
 import { PropertyFilters } from "../../components/dashboard/PropertyFilters";
 import { AppButton } from "../../components/ui/AppButton";
+import { AppBreadcrumbs } from "../../components/ui/AppBreadcrumbs";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { ErrorState } from "../../components/ui/ErrorState";
-import { PageHeader } from "../../components/ui/PageHeader";
 import { SectionCard } from "../../components/ui/SectionCard";
 import { usePortalData } from "../../hooks/usePortalData";
 import { useAuthStore } from "../../stores/authStore";
@@ -19,6 +19,8 @@ export const PropertyListPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCity, setSelectedCity] = useState("all");
   const [showSavedOnly, setShowSavedOnly] = useState(false);
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(9);
   const clearSession = useAuthStore((state) => state.clearSession);
   const showToast = useToastStore((state) => state.showToast);
   const navigate = useNavigate();
@@ -28,30 +30,35 @@ export const PropertyListPage = () => {
     busyPropertyId,
     userQuery,
     propertiesQuery,
+    propertiesPagination,
     blockingUserError,
     userError,
     propertiesError,
     toggleFavourite,
     cities,
-  } = usePortalData();
+  } = usePortalData({
+    includeProperties: true,
+    includeFavourites: false,
+    includeCities: true,
+    propertiesPage: page,
+    propertiesPageSize: rowsPerPage,
+    propertiesSearch: searchTerm,
+    propertiesCity: selectedCity === "all" ? "" : selectedCity,
+    propertiesSavedOnly: showSavedOnly,
+  });
 
   useEffect(() => {
     if (userError) {
-      showToast(`${userError.message} Showing the last available profile details.`, "warning");
+      showToast(
+        `${userError.message} Showing the last available profile details.`,
+        "warning",
+      );
     }
   }, [showToast, userError]);
 
-  const filteredProperties = properties.filter((property) => {
-    const normalizedSearch = searchTerm.trim().toLowerCase();
-    const matchesSearch =
-      normalizedSearch.length === 0 ||
-      property.title.toLowerCase().includes(normalizedSearch) ||
-      property.city.toLowerCase().includes(normalizedSearch);
-    const matchesCity = selectedCity === "all" || property.city === selectedCity;
-    const matchesSaved = !showSavedOnly || Boolean(property.isFavourite);
-
-    return matchesSearch && matchesCity && matchesSaved;
-  });
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm, selectedCity, showSavedOnly, rowsPerPage]);
 
   if (userQuery.isLoading && !user) {
     return (
@@ -69,7 +76,10 @@ export const PropertyListPage = () => {
           description={blockingUserError.message}
           action={
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-              <AppButton startIcon={<RefreshOutlinedIcon />} onClick={() => userQuery.refetch()}>
+              <AppButton
+                startIcon={<RefreshOutlinedIcon />}
+                onClick={() => userQuery.refetch()}
+              >
                 Retry
               </AppButton>
               <AppButton variant="outlined" onClick={() => clearSession()}>
@@ -84,19 +94,18 @@ export const PropertyListPage = () => {
 
   return (
     <Stack spacing={4}>
-      <PageHeader
-        eyebrow="Properties"
-        title="Properties"
-        subtitle="Browse and manage the property catalogue."
+      <AppBreadcrumbs
+        items={[
+          { label: "Dashboard", to: "/dashboard" },
+          { label: "Properties" },
+        ]}
         actions={
-          <Stack spacing={1.5}>
-            <Typography variant="body2" color="text.secondary">
-              {filteredProperties.length} {filteredProperties.length === 1 ? "property" : "properties"}
-            </Typography>
-            <AppButton startIcon={<AddHomeOutlinedIcon />} onClick={() => navigate("/dashboard/properties/new")}>
-              Create property
-            </AppButton>
-          </Stack>
+          <AppButton
+            startIcon={<AddHomeOutlinedIcon />}
+            onClick={() => navigate("/dashboard/properties/new")}
+          >
+            Create property
+          </AppButton>
         }
       />
       {!propertiesError ? (
@@ -105,7 +114,7 @@ export const PropertyListPage = () => {
           selectedCity={selectedCity}
           showSavedOnly={showSavedOnly}
           cities={cities}
-          resultCount={filteredProperties.length}
+          resultCount={propertiesPagination.totalItems}
           onSearchTermChange={setSearchTerm}
           onCityChange={setSelectedCity}
           onShowSavedOnlyChange={setShowSavedOnly}
@@ -141,12 +150,15 @@ export const PropertyListPage = () => {
             title={propertiesError.title}
             description={propertiesError.message}
             action={
-              <AppButton startIcon={<RefreshOutlinedIcon />} onClick={() => propertiesQuery.refetch()}>
+              <AppButton
+                startIcon={<RefreshOutlinedIcon />}
+                onClick={() => propertiesQuery.refetch()}
+              >
                 Try again
               </AppButton>
             }
           />
-        ) : filteredProperties.length === 0 ? (
+        ) : properties.length === 0 ? (
           <EmptyState
             icon={<HomeOutlinedIcon />}
             title="No properties match these filters"
@@ -167,18 +179,40 @@ export const PropertyListPage = () => {
             }
           />
         ) : (
-          <Grid2 container spacing={3}>
-            {filteredProperties.map((property) => (
-              <Grid2 key={property.id} size={{ xs: 12, md: 6, xl: 4 }}>
-                <PropertyCard
-                  property={property}
-                  onToggleFavourite={toggleFavourite}
-                  busy={busyPropertyId === property.id}
-                  onViewDetails={() => navigate(`/dashboard/properties/${property.id}`)}
-                />
-              </Grid2>
-            ))}
-          </Grid2>
+          <Stack spacing={3}>
+            <Grid2 container spacing={3}>
+              {properties.map((property) => (
+                <Grid2 key={property.id} size={{ xs: 12, md: 6, xl: 4 }}>
+                  <PropertyCard
+                    property={property}
+                    onToggleFavourite={toggleFavourite}
+                    busy={busyPropertyId === property.id}
+                    onViewDetails={() =>
+                      navigate(`/dashboard/properties/${property.id}`)
+                    }
+                  />
+                </Grid2>
+              ))}
+            </Grid2>
+            <TablePagination
+              component="div"
+              count={propertiesPagination.totalItems}
+              page={Math.max(propertiesPagination.page - 1, 0)}
+              onPageChange={(_event, nextPage) => setPage(nextPage + 1)}
+              rowsPerPage={propertiesPagination.pageSize}
+              onRowsPerPageChange={(event) => {
+                const nextRowsPerPage = Number(event.target.value);
+                setRowsPerPage(nextRowsPerPage);
+                setPage(1);
+              }}
+              rowsPerPageOptions={[6, 9, 12, 24]}
+              sx={{
+                borderTop: "1px solid",
+                borderColor: "divider",
+                pt: 1,
+              }}
+            />
+          </Stack>
         )}
       </SectionCard>
     </Stack>

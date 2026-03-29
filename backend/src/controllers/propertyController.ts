@@ -1,9 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { Request, Response } from "express";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../db/prisma.js";
 import { AppError } from "../utils/http.js";
-import { createPropertySchema, propertyParamsSchema, propertySchema } from "../utils/validation.js";
+import {
+  createPropertySchema,
+  propertyListQuerySchema,
+  propertyParamsSchema,
+  propertySchema,
+} from "../utils/validation.js";
 
 const mapPropertyResponse = (property: {
   id: number;
@@ -30,18 +36,72 @@ export const listProperties = async (request: Request, response: Response) => {
     throw new AppError("Authentication required.", 401);
   }
 
-  const properties = await prisma.property.findMany({
-    orderBy: { id: "asc" },
-    include: {
-      favourites: {
-        where: { userId },
-        select: { userId: true },
+  const { page, pageSize, search, city, savedOnly } = propertyListQuerySchema.parse(request.query);
+  const where: Prisma.PropertyWhereInput = {
+    ...(search
+      ? {
+          OR: [
+            { title: { contains: search, mode: "insensitive" } },
+            { city: { contains: search, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+    ...(city ? { city: { equals: city, mode: "insensitive" } } : {}),
+    ...(savedOnly
+      ? {
+          favourites: {
+            some: { userId },
+          },
+        }
+      : {}),
+  };
+
+  const [properties, totalItems] = await Promise.all([
+    prisma.property.findMany({
+      where,
+      orderBy: { id: "asc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: {
+        favourites: {
+          where: { userId },
+          select: { userId: true },
+        },
+      },
+    }),
+    prisma.property.count({ where }),
+  ]);
+
+  response.json({
+    success: true,
+    message: "Properties fetched successfully",
+    data: {
+      items: properties.map(mapPropertyResponse),
+      pagination: {
+        total: totalItems,
+        page,
+        limit: pageSize,
+        total_pages: Math.max(1, Math.ceil(totalItems / pageSize)),
       },
     },
   });
+};
+
+export const listPropertyCities = async (request: Request, response: Response) => {
+  if (!request.user?.sub) {
+    throw new AppError("Authentication required.", 401);
+  }
+
+  const cityRows = await prisma.property.findMany({
+    distinct: ["city"],
+    select: { city: true },
+    orderBy: { city: "asc" },
+  });
 
   response.json({
-    properties: properties.map(mapPropertyResponse),
+    success: true,
+    message: "Property cities fetched successfully",
+    data: cityRows.map((row) => row.city),
   });
 };
 

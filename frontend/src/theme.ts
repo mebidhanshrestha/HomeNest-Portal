@@ -122,7 +122,7 @@ export const createAppTheme = (mode: ThemeMode) => {
           root: {
             minHeight: 44,
             borderRadius: 6,
-            paddingInline: 18,
+            paddingInline: 14,
             fontWeight: 600,
             transition: "all 150ms ease",
           },

@@ -12,7 +12,7 @@ type PropertyCreateFormValues = {
   title: string;
   city: string;
   price: string;
-  image: FileList;
+  image: File | null;
 };
 
 type PropertyCreateFormProps = {
@@ -41,14 +41,15 @@ export const PropertyCreateForm = ({
       title: "",
       city: "",
       price: "",
+      image: null,
     },
     mode: "onSubmit",
     reValidateMode: "onChange",
   });
   const imageRegistration = register("image", {
-    validate: (value) => value?.length > 0 || "Property image is required.",
+    validate: (value) => value instanceof File || "Property image is required.",
   });
-  const selectedImage = watch("image")?.[0];
+  const selectedImage = watch("image");
 
   const assignImage = (file: File | null) => {
     if (!file) {
@@ -70,7 +71,7 @@ export const PropertyCreateForm = ({
       inputRef.current.files = fileList.files;
     }
 
-    setValue("image", fileList.files, {
+    setValue("image", file, {
       shouldDirty: true,
       shouldTouch: true,
       shouldValidate: true,
@@ -93,7 +94,7 @@ export const PropertyCreateForm = ({
           title: values.title.trim(),
           city: values.city.trim(),
           price: Number(values.price),
-          image: values.image[0],
+          image: values.image as File,
         }),
       )}
     >
@@ -175,7 +176,6 @@ export const PropertyCreateForm = ({
             inputRef.current = element;
           }}
           onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-            imageRegistration.onChange(event);
             assignImage(event.target.files?.[0] ?? null);
           }}
         />
