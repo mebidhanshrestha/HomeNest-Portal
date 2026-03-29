@@ -1,8 +1,4 @@
-# HomeNest Portal Take-Home Assessment
-
-This project is a take-home implementation for a **Junior Full-Stack Engineer** assessment based on:
-
-**Task: Auth + Simple Buyer Portal (Favourites)**
+# HomeNest Portal
 
 The application provides a small buyer portal for a real-estate broker with:
 - user registration and login
@@ -11,9 +7,9 @@ The application provides a small buyer portal for a real-estate broker with:
 - a shared property catalogue
 - user-specific favourites
 
-## Problem Statement
+## Project Overview
 
-Build part of a buyer portal where a user can:
+This project focuses on a buyer portal where a user can:
 - register and log in with email and password
 - authenticate with a secure token-based flow
 - view a dashboard with their name and role
@@ -21,7 +17,7 @@ Build part of a buyer portal where a user can:
 - add and remove favourites
 - see only their own favourites
 
-The project also requires:
+The application also includes:
 - basic frontend screens
 - server-side validation and error handling
 - a small database-backed data layer
@@ -86,9 +82,9 @@ To build a clean, working full-stack buyer portal that demonstrates core authent
   - properties
   - favourites
 
-### 5. Additional Enhancements Beyond The Brief
+### 5. Additional Enhancements
 
-These go beyond the original assessment brief, but are included in the current implementation:
+The current implementation also includes:
 
 - property create, detail, edit, and list modules
 - image upload with `multer`
@@ -140,7 +136,7 @@ Create or update [backend/.env](/C:/Users/NCC-User/Desktop/HomeNest-Portal/backe
 
 ```env
 PORT=8000
-CLIENT_ORIGIN=http://localhost:3000,http://127.0.0.1:3000
+CLIENT_ORIGIN=http://localhost:3000
 DATABASE_URL=your_neon_connection_string
 JWT_SECRET=replace-this-with-a-long-random-secret
 JWT_EXPIRES_IN=1d
@@ -196,13 +192,13 @@ npm run dev
 
 The frontend runs on:
 
-`http://127.0.0.1:3000`
+`http://localhost:3000`
 
 ## Example User Flow
 
 ### Flow 1: Sign Up To Favourite A Property
 
-1. Open `http://127.0.0.1:3000`
+1. Open `http://localhost:3000`
 2. Create a new account
 3. After registration, you are redirected into the buyer portal
 4. Open the properties page
@@ -318,11 +314,11 @@ The frontend surfaces these with:
 
 ## Challenges Faced And How They Were Solved
 
-### 1. CORS And Localhost Variants
+### 1. CORS And Local Development Origins
 
-**Challenge:** The frontend was accessed from `127.0.0.1:3000`, while the backend initially allowed only `localhost:3000`, causing browser-side request failures.
+**Challenge:** Frontend and backend local origins need to stay aligned during development to avoid browser-side request failures.
 
-**Solution:** Backend CORS handling was updated to accept both `localhost` and `127.0.0.1` loopback variants for local development.
+**Solution:** The local setup was standardized around `http://localhost:3000`, and backend CORS handling was made tolerant for loopback development.
 
 ### 2. Form State And Validation Consistency
 
@@ -354,32 +350,32 @@ The frontend surfaces these with:
 
 **Solution:** The backend process must be stopped before regeneration, then restarted after `prisma generate` completes.
 
-## Evaluation Focus Mapping
+## Project Highlights
 
-### Understanding Of Auth Flows And Basic Security
+### Authentication And Security
 
 - JWT authentication is implemented
 - password hashing is implemented with Argon2
 - protected routes require a valid token
 
-### Simple DB Design And CRUD Operations
+### Database And CRUD Design
 
 - users, properties, and favourites are modeled in Prisma
 - favourites can be created, listed, and removed
 - properties can be created, viewed, updated, and deleted
 
-### Clear Separation Between Frontend And Backend
+### Frontend And Backend Separation
 
 - frontend and backend live in separate folders
 - backend exposes API routes
 - frontend consumes the API through service modules
 
-### Ability To Read And Extend Existing Code
+### Extensibility
 
-- the project evolved from the original auth/favourites brief into a more complete property portal
-- additional modules were added while preserving the original scope
+- the project is structured so the auth, property, and favourites flows can be extended independently
+- additional modules such as analytics, uploads, and account management were added without collapsing the frontend/backend separation
 
-### Basic UX Thinking
+### UX Considerations
 
 - validation messages are shown clearly
 - toast feedback is used for actions
