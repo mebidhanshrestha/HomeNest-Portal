@@ -7,6 +7,7 @@ import { ErrorState } from "../../components/ui/ErrorState";
 import { SectionCard } from "../../components/ui/SectionCard";
 import { normalizeAppError } from "../../lib/api";
 import { getProperty, updateProperty, type PropertyPayload } from "../../services/propertyService";
+import { useAuthStore } from "../../stores/authStore";
 import { useToastStore } from "../../stores/toastStore";
 import { PropertyForm } from "./PropertyForm";
 
@@ -14,9 +15,10 @@ export const PropertyEditPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const showToast = useToastStore((state) => state.showToast);
+  const authScope = useAuthStore((state) => state.user?.id ?? state.token ?? "anonymous");
   const propertyId = Number(useParams().id);
   const propertyQuery = useQuery({
-    queryKey: ["property", propertyId],
+    queryKey: ["property", authScope, propertyId],
     queryFn: () => getProperty(propertyId),
     enabled: Number.isFinite(propertyId),
   });
@@ -25,7 +27,7 @@ export const PropertyEditPage = () => {
     onSuccess: async (property) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["properties"] }),
-        queryClient.invalidateQueries({ queryKey: ["property", property.id] }),
+        queryClient.invalidateQueries({ queryKey: ["property"] }),
       ]);
       showToast("Property updated successfully.", "success");
       navigate(`/dashboard/properties/${property.id}`);

@@ -58,7 +58,7 @@ export const SavedPropertiesPanel = ({
                   </Typography>
                 </Stack>
                 <Typography variant="subtitle2">
-                  ${property.price.toLocaleString("en-US")}
+                  NPR {property.price.toLocaleString("en-US")}
                 </Typography>
               </Stack>
             </Stack>

@@ -1,15 +1,12 @@
 import { useEffect } from "react";
 import { Box, CircularProgress, Grid2, Stack, Typography } from "@mui/material";
-import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PriceCheckOutlinedIcon from "@mui/icons-material/PriceCheckOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import SellOutlinedIcon from "@mui/icons-material/SellOutlined";
 import TurnedInNotOutlinedIcon from "@mui/icons-material/TurnedInNotOutlined";
-import { useNavigate } from "react-router-dom";
-import { PropertyInsights } from "../components/dashboard/PropertyInsights";
-import { SavedPropertiesPanel } from "../components/dashboard/SavedPropertiesPanel";
 import { AppButton } from "../components/ui/AppButton";
+import { DashboardAnalytics } from "../components/dashboard/DashboardAnalytics";
 import { ErrorState } from "../components/ui/ErrorState";
 import { PageHeader } from "../components/ui/PageHeader";
 import { SectionCard } from "../components/ui/SectionCard";
@@ -19,7 +16,6 @@ import { useAuthStore } from "../stores/authStore";
 import { useToastStore } from "../stores/toastStore";
 
 export const DashboardPage = () => {
-  const navigate = useNavigate();
   const clearSession = useAuthStore((state) => state.clearSession);
   const showToast = useToastStore((state) => state.showToast);
   const {
@@ -28,13 +24,9 @@ export const DashboardPage = () => {
     favourites,
     cities,
     averagePrice,
-    busyPropertyId,
     userQuery,
-    favouritesQuery,
     blockingUserError,
     userError,
-    favouritesError,
-    toggleFavourite,
   } = usePortalData();
 
   useEffect(() => {
@@ -108,7 +100,21 @@ export const DashboardPage = () => {
         <Grid2 size={{ xs: 12, md: 6, xl: 3 }}>
           <StatCard
             label="Average price"
-            value={`$${averagePrice.toLocaleString("en-US")}`}
+            value={
+              <Stack spacing={0.25}>
+                <Typography
+                  component="span"
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ fontWeight: 700, letterSpacing: 0.6 }}
+                >
+                  NPR
+                </Typography>
+                <Typography component="span" variant="h4" fontWeight={600} sx={{ lineHeight: 1.1 }}>
+                  {averagePrice.toLocaleString("en-US")}
+                </Typography>
+              </Stack>
+            }
             helper="A quick view of the current price range."
             icon={<PriceCheckOutlinedIcon />}
           />
@@ -124,91 +130,11 @@ export const DashboardPage = () => {
       </Grid2>
 
       <Grid2 container spacing={3}>
-        <Grid2 size={{ xs: 12, lg: 8 }}>
-          <Stack spacing={3}>
-            <SectionCard
-              title="Quick actions"
-              description="Open the dedicated pages for browsing listings, reviewing saved homes, or managing your account."
-            >
-              <Stack direction={{ xs: "column", md: "row" }} spacing={1.5} useFlexGap flexWrap="wrap">
-                <AppButton onClick={() => navigate("/dashboard/properties")}>
-                  Browse properties
-                </AppButton>
-                <AppButton variant="outlined" onClick={() => navigate("/dashboard/saved")}>
-                  View saved homes
-                </AppButton>
-                <AppButton variant="outlined" onClick={() => navigate("/dashboard/account")}>
-                  Open account
-                </AppButton>
-              </Stack>
-            </SectionCard>
-
-            <SectionCard
-              title="Saved homes preview"
-              description="A quick look at the shortlist you can manage in the Saved Homes page."
-              action={
-                <AppButton variant="outlined" onClick={() => navigate("/dashboard/saved")}>
-                  Open saved homes
-                </AppButton>
-              }
-            >
-              {favouritesQuery.isLoading ? (
-                <Box sx={{ minHeight: 220, display: "grid", placeItems: "center" }}>
-                  <CircularProgress />
-                </Box>
-              ) : favouritesError ? (
-                <ErrorState
-                  title={favouritesError.title}
-                  description={favouritesError.message}
-                  action={
-                    <AppButton
-                      startIcon={<RefreshOutlinedIcon />}
-                      onClick={() => favouritesQuery.refetch()}
-                    >
-                      Try again
-                    </AppButton>
-                  }
-                />
-              ) : (
-                <SavedPropertiesPanel
-                  favourites={favourites.slice(0, 3)}
-                  busyPropertyId={busyPropertyId}
-                  onRemoveFavourite={toggleFavourite}
-                />
-              )}
-            </SectionCard>
-          </Stack>
-        </Grid2>
-
-        <Grid2 size={{ xs: 12, lg: 4 }}>
-          <Stack spacing={3}>
-            <PropertyInsights
-              totalProperties={properties.length}
-              favouriteCount={favourites.length}
-              cityCount={cities.length}
-              averagePriceLabel={`$${averagePrice.toLocaleString("en-US")}`}
-            />
-            <SectionCard
-              title="Next best step"
-              description="If you have not started shortlisting homes yet, begin with the listings page."
-            >
-              <Stack spacing={1.5}>
-                <Typography color="text.secondary">
-                  {favourites.length === 0
-                    ? "Start by browsing the catalogue and save the homes you want to compare."
-                    : "You already have homes saved. Open the Saved Homes page to review them in detail."}
-                </Typography>
-                <AppButton
-                  startIcon={favourites.length === 0 ? <HomeOutlinedIcon /> : <BookmarkBorderOutlinedIcon />}
-                  onClick={() =>
-                    navigate(favourites.length === 0 ? "/dashboard/properties" : "/dashboard/saved")
-                  }
-                >
-                  {favourites.length === 0 ? "Open properties" : "Open saved homes"}
-                </AppButton>
-              </Stack>
-            </SectionCard>
-          </Stack>
+        <Grid2 size={{ xs: 12 }}>
+          <DashboardAnalytics
+            properties={properties}
+            favouriteCount={favourites.length}
+          />
         </Grid2>
       </Grid2>
     </Stack>

@@ -5,7 +5,7 @@ import { SectionCard } from "./SectionCard";
 
 type StatCardProps = {
   label: string;
-  value: string;
+  value: ReactNode;
   helper: string;
   icon: ReactNode;
   tone?: "primary" | "secondary";
@@ -34,7 +34,7 @@ export const StatCard = ({
           >
             {label}
           </Typography>
-          <Typography variant="h4" fontWeight={600}>
+          <Typography variant="h4" fontWeight={600} sx={{ lineHeight: 1.2 }}>
             {value}
           </Typography>
         </Stack>

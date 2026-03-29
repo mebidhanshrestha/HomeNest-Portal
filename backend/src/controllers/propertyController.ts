@@ -18,6 +18,7 @@ const mapPropertyResponse = (property: {
   price: number;
   imageUrl: string;
   createdAt: Date;
+  creator: { id: number; name: string; email: string } | null;
   favourites: { userId: number }[];
 }) => ({
   id: property.id,
@@ -26,6 +27,13 @@ const mapPropertyResponse = (property: {
   price: property.price,
   imageUrl: property.imageUrl,
   createdAt: property.createdAt.toISOString(),
+  createdBy: property.creator
+    ? {
+        id: property.creator.id,
+        name: property.creator.name,
+        email: property.creator.email,
+      }
+    : null,
   isFavourite: property.favourites.length > 0,
 });
 
@@ -63,6 +71,13 @@ export const listProperties = async (request: Request, response: Response) => {
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {
+        creator: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
         favourites: {
           where: { userId },
           select: { userId: true },
@@ -116,6 +131,13 @@ export const getProperty = async (request: Request, response: Response) => {
   const property = await prisma.property.findUnique({
     where: { id },
     include: {
+      creator: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
       favourites: {
         where: { userId },
         select: { userId: true },
@@ -146,8 +168,16 @@ export const createProperty = async (request: Request, response: Response) => {
     data: {
       ...values,
       imageUrl,
+      createdById: request.user.sub,
     },
     include: {
+      creator: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
       favourites: {
         select: { userId: true },
       },
@@ -176,6 +206,13 @@ export const updateProperty = async (request: Request, response: Response) => {
     where: { id },
     data: values,
     include: {
+      creator: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
       favourites: {
         where: { userId },
         select: { userId: true },

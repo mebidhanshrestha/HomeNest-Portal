@@ -19,9 +19,9 @@ type UsePortalDataOptions = {
   propertiesSavedOnly?: boolean;
 };
 
-const favouritesQueryKey = ["favourites"];
-const meQueryKey = ["me"];
 const propertiesBaseQueryKey = ["properties"];
+const favouritesBaseQueryKey = ["favourites"];
+const meBaseQueryKey = ["me"];
 const propertyCitiesQueryKey = ["property-cities"];
 
 export const usePortalData = (options: UsePortalDataOptions = {}) => {
@@ -34,6 +34,7 @@ export const usePortalData = (options: UsePortalDataOptions = {}) => {
   const includeProperties = options.includeProperties ?? true;
   const includeFavourites = options.includeFavourites ?? true;
   const includeCities = options.includeCities ?? true;
+  const authScope = storedUser?.id ?? token ?? "anonymous";
   const propertiesPage = options.propertiesPage ?? 1;
   const propertiesPageSize = options.propertiesPageSize ?? 1000;
   const propertiesSearch = options.propertiesSearch ?? "";
@@ -41,12 +42,15 @@ export const usePortalData = (options: UsePortalDataOptions = {}) => {
   const propertiesSavedOnly = options.propertiesSavedOnly ?? false;
   const propertiesQueryKey = [
     ...propertiesBaseQueryKey,
+    authScope,
     propertiesPage,
     propertiesPageSize,
     propertiesSearch,
     propertiesCity,
     propertiesSavedOnly,
   ];
+  const favouritesQueryKey = [...favouritesBaseQueryKey, authScope];
+  const meQueryKey = [...meBaseQueryKey, token ?? "anonymous"];
 
   const userQuery = useQuery({
     queryKey: meQueryKey,
@@ -108,7 +112,7 @@ export const usePortalData = (options: UsePortalDataOptions = {}) => {
       showToast(message, severity);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: propertiesBaseQueryKey }),
-        queryClient.invalidateQueries({ queryKey: favouritesQueryKey }),
+        queryClient.invalidateQueries({ queryKey: favouritesBaseQueryKey }),
       ]);
     },
     onError: (error) => {

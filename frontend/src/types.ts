@@ -12,6 +12,11 @@ export type Property = {
   price: number;
   imageUrl: string;
   createdAt: string;
+  createdBy?: {
+    id: number;
+    name: string;
+    email: string;
+  } | null;
   isFavourite?: boolean;
 };
 

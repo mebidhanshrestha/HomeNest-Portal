@@ -16,19 +16,22 @@ model User {
   resetPasswordExpiresAt DateTime? @map("reset_password_expires_at")
   role         String      @default("buyer")
   createdAt    DateTime    @default(now()) @map("created_at")
+  createdProperties Property[] @relation("PropertyCreator")
   favourites   Favourite[]
 
   @@map("users")
 }
 
 model Property {
-  id         Int         @id @default(autoincrement())
-  title      String
-  city       String
-  price      Int
-  imageUrl   String      @map("image_url")
-  createdAt  DateTime    @default(now()) @map("created_at")
-  favourites Favourite[]
+  id          Int         @id @default(autoincrement())
+  title       String
+  city        String
+  price       Int
+  imageUrl    String      @map("image_url")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  createdById Int?        @map("created_by_id")
+  creator     User?       @relation("PropertyCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  favourites  Favourite[]
 
   @@map("properties")
 }

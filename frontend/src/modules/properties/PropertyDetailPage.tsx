@@ -15,7 +15,9 @@ import BookmarkBorderOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlin
 import BookmarkOutlinedIcon from "@mui/icons-material/BookmarkOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import RefreshOutlinedIcon from "@mui/icons-material/RefreshOutlined";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppButton } from "../../components/ui/AppButton";
@@ -25,6 +27,7 @@ import { SectionCard } from "../../components/ui/SectionCard";
 import { normalizeAppError } from "../../lib/api";
 import { addFavourite, removeFavourite } from "../../services/favouriteService";
 import { deleteProperty, getProperty } from "../../services/propertyService";
+import { useAuthStore } from "../../stores/authStore";
 import { useToastStore } from "../../stores/toastStore";
 
 export const PropertyDetailPage = () => {
@@ -32,9 +35,10 @@ export const PropertyDetailPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const showToast = useToastStore((state) => state.showToast);
+  const authScope = useAuthStore((state) => state.user?.id ?? state.token ?? "anonymous");
   const propertyId = Number(useParams().id);
   const propertyQuery = useQuery({
-    queryKey: ["property", propertyId],
+    queryKey: ["property", authScope, propertyId],
     queryFn: () => getProperty(propertyId),
     enabled: Number.isFinite(propertyId),
   });
@@ -59,7 +63,7 @@ export const PropertyDetailPage = () => {
       showToast(message, "success");
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["properties"] }),
-        queryClient.invalidateQueries({ queryKey: ["property", propertyId] }),
+        queryClient.invalidateQueries({ queryKey: ["property"] }),
         queryClient.invalidateQueries({ queryKey: ["favourites"] }),
       ]);
     },
@@ -75,6 +79,7 @@ export const PropertyDetailPage = () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["properties"] }),
         queryClient.invalidateQueries({ queryKey: ["favourites"] }),
+        queryClient.invalidateQueries({ queryKey: ["property"] }),
       ]);
       showToast("Property deleted successfully.", "success");
       navigate("/dashboard/properties", { replace: true });
@@ -179,15 +184,27 @@ export const PropertyDetailPage = () => {
                 <PlaceOutlinedIcon color="action" fontSize="small" />
                 <Typography color="text.secondary">{property.city}</Typography>
               </Stack>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <PersonOutlineOutlinedIcon color="action" fontSize="small" />
+                <Typography color="text.secondary">
+                  Listed by {property.createdBy?.name ?? "Unknown user"}
+                </Typography>
+              </Stack>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <AccessTimeOutlinedIcon color="action" fontSize="small" />
+                <Typography color="text.secondary">
+                  Created on{" "}
+                  {new Date(property.createdAt).toLocaleString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </Typography>
+              </Stack>
               <Typography variant="h5" color="primary.main" fontWeight={700}>
                 NPR {property.price.toLocaleString("en-US")}
-              </Typography>
-              <Typography color="text.secondary">
-                Created {new Date(property.createdAt).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
               </Typography>
             </Stack>
           </SectionCard>
