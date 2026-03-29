@@ -24,6 +24,10 @@ frontend/.env
 !backend/.env.example
 !frontend/.env.example
 
+# Local tooling
+backend/.agents/
+backend/skills-lock.json
+
 # Logs and OS files
 *.log
 .DS_Store
