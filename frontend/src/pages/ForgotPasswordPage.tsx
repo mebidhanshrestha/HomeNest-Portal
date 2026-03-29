@@ -63,7 +63,7 @@ export const ForgotPasswordPage = () => {
             : `radial-gradient(ellipse at top, ${theme.palette.primary.light}12 0%, transparent 50%), ${theme.palette.background.default}`,
       }}
     >
-      <Container maxWidth="sm">
+      <Container maxWidth="md">
         <Paper elevation={0} sx={{ p: 5, borderRadius: 2, border: 1, borderColor: "divider" }}>
           <Stack spacing={3}>
             <Box>

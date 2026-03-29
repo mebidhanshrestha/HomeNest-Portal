@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Avatar,
   Box,
@@ -70,7 +70,8 @@ export const AppLayout = () => {
   const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
   const [desktopOpen, setDesktopOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [profileAnchorEl, setProfileAnchorEl] = useState<null | HTMLElement>(null);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const profileButtonRef = useRef<HTMLButtonElement | null>(null);
   const user = useAuthStore((state) => state.user);
   const clearSession = useAuthStore((state) => state.clearSession);
   const mode = useThemeStore((state) => state.mode);
@@ -90,7 +91,6 @@ export const AppLayout = () => {
     navigationItems.find((item) => item.matches(location.pathname)) ?? navigationItems[0];
   const drawerOpen = isDesktop ? desktopOpen : mobileOpen;
   const sidebarExpanded = isDesktop ? desktopOpen : true;
-  const profileMenuOpen = Boolean(profileAnchorEl);
 
   const userInitial = useMemo(
     () => user?.name?.trim().charAt(0).toUpperCase() ?? "U",
@@ -112,7 +112,7 @@ export const AppLayout = () => {
   };
 
   const handleProfileClose = () => {
-    setProfileAnchorEl(null);
+    setProfileMenuOpen(false);
   };
 
   const handleLogout = () => {
@@ -341,7 +341,8 @@ export const AppLayout = () => {
           </Box>
 
           <IconButton
-            onClick={(event) => setProfileAnchorEl(event.currentTarget)}
+            ref={profileButtonRef}
+            onClick={() => setProfileMenuOpen(true)}
             sx={{ p: 0.5 }}
           >
             <Avatar
@@ -370,7 +371,7 @@ export const AppLayout = () => {
       </Box>
 
       <Menu
-        anchorEl={profileAnchorEl}
+        anchorEl={profileButtonRef.current}
         open={profileMenuOpen}
         onClose={handleProfileClose}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
@@ -408,7 +409,6 @@ export const AppLayout = () => {
             checked={mode === "dark"}
             onChange={() => {
               toggleMode();
-              handleProfileClose();
             }}
             onClick={(event) => event.stopPropagation()}
             sx={{ ml: 1.5, flexShrink: 0 }}

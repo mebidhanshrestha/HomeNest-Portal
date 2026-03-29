@@ -30,7 +30,7 @@ export const createAppTheme = (mode: ThemeMode) => {
       borderRadius: 6,
     },
     typography: {
-      fontFamily: '"Inter", "SF Pro Display", "Segoe UI", "Helvetica Neue", sans-serif',
+      fontFamily: '"Montserrat", "Segoe UI", "Helvetica Neue", Arial, sans-serif',
       h2: {
         fontWeight: 700,
         lineHeight: 1.15,
@@ -180,6 +180,23 @@ export const createAppTheme = (mode: ThemeMode) => {
             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
               borderColor: APP_BRAND_COLORS.primary,
               borderWidth: 1.5,
+            },
+          },
+          input: {
+            "&:-webkit-autofill": {
+              WebkitBoxShadow: `0 0 0 100px ${alpha(surfaces.paper, mode === "light" ? 0.98 : 0.92)} inset`,
+              WebkitTextFillColor: surfaces.textPrimary,
+              caretColor: surfaces.textPrimary,
+              borderRadius: 6,
+              transition: "background-color 9999s ease-out 0s",
+            },
+            "&:-webkit-autofill:hover": {
+              WebkitBoxShadow: `0 0 0 100px ${alpha(surfaces.paper, mode === "light" ? 0.98 : 0.92)} inset`,
+              WebkitTextFillColor: surfaces.textPrimary,
+            },
+            "&:-webkit-autofill:focus": {
+              WebkitBoxShadow: `0 0 0 100px ${alpha(surfaces.paper, mode === "light" ? 0.98 : 0.92)} inset`,
+              WebkitTextFillColor: surfaces.textPrimary,
             },
           },
           notchedOutline: {
