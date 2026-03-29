@@ -42,6 +42,14 @@ app.use(
 app.use(express.json());
 app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
+app.get("/", (_request, response) => {
+  response.json({
+    status: "ok",
+    service: "HomeNest Portal Backend",
+    health: "/api/health",
+  });
+});
+
 app.get("/api/health", (_request, response) => {
   response.json({ status: "ok" });
 });
